@@ -40,6 +40,9 @@ clean:
 build-image:
 	$(CONTAINER_ENGINE) build --pull --platform linux/amd64 --build-arg=GOLANGCI_LINT_VERSION -t backplane-api-builder --target builder .
 
+openapi-image:
+	$(CONTAINER_ENGINE) build --pull --platform linux/amd64 -f openapi.Dockerfile -t backplane-api-openapi .
+
 .PHONY: lint-in-container
 lint-in-container: build-image
 	$(RUN_IN_CONTAINER_CMD) "go mod download && make lint"
@@ -69,7 +72,8 @@ cover-html:
 generate-in-container: build-image
 	$(RUN_IN_CONTAINER_CMD) "make generate"
 
-generate:
+generate: openapi-image
+	$(CONTAINER_ENGINE) run --platform linux/amd64 --privileged=true --rm -v $(shell pwd):/app backplane-api-openapi /bin/sh -c "mkdir -p /app/pkg/client && oapi-codegen -generate types,client,spec /app/openapi/openapi.yaml > /app/pkg/client/BackplaneApi.go"
 	go generate -v ./...
 
 dev-certs:
