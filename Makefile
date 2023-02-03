@@ -36,9 +36,6 @@ build: clean
 clean:
 	rm -f backplane-api
 
-build-image:
-	$(CONTAINER_ENGINE) build --pull --platform linux/amd64 --build-arg=GOLANGCI_LINT_VERSION -t backplane-api-builder --target builder .
-
 openapi-image:
 	$(CONTAINER_ENGINE) build --pull --platform linux/amd64 -f openapi.Dockerfile -t backplane-api-openapi .
 
