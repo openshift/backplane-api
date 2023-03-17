@@ -2,4 +2,4 @@
 
 ## What it does 
 
-This repo only hosts the openapi definitions and generated client package.
+This repo only hosts the OpenAPI definitions and generated client package.
