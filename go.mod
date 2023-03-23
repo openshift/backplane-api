@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/deepmap/oapi-codegen v1.12.4
 	github.com/getkin/kin-openapi v0.113.0
-	github.com/gorilla/mux v1.8.0
 )
 
 require (
