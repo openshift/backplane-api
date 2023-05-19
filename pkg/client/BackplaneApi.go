@@ -293,6 +293,11 @@ type GetScriptsParams struct {
 	Scriptname *string `form:"scriptname,omitempty" json:"scriptname,omitempty"`
 }
 
+// GetScriptsByClusterParams defines parameters for GetScriptsByCluster.
+type GetScriptsByClusterParams struct {
+	Scriptname *string `form:"scriptname,omitempty" json:"scriptname,omitempty"`
+}
+
 // GetJobLogsParams defines parameters for GetJobLogs.
 type GetJobLogsParams struct {
 	// Version The version to return. Default is JSON, v2 is streaming
@@ -425,6 +430,9 @@ type ClientInterface interface {
 
 	// GetScripts request
 	GetScripts(ctx context.Context, params *GetScriptsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetScriptsByCluster request
+	GetScriptsByCluster(ctx context.Context, clusterId string, params *GetScriptsByClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetAllJobs request
 	GetAllJobs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -589,6 +597,18 @@ func (c *Client) LoginCluster(ctx context.Context, clusterId string, reqEditors 
 
 func (c *Client) GetScripts(ctx context.Context, params *GetScriptsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetScriptsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetScriptsByCluster(ctx context.Context, clusterId string, params *GetScriptsByClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetScriptsByClusterRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1140,6 +1160,60 @@ func NewGetScriptsRequest(server string, params *GetScriptsParams) (*http.Reques
 	return req, nil
 }
 
+// NewGetScriptsByClusterRequest generates requests for GetScriptsByCluster
+func NewGetScriptsByClusterRequest(server string, clusterId string, params *GetScriptsByClusterParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/script/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Scriptname != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scriptname", runtime.ParamLocationQuery, *params.Scriptname); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetAllJobsRequest generates requests for GetAllJobs
 func NewGetAllJobsRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -1624,6 +1698,9 @@ type ClientWithResponsesInterface interface {
 	// GetScripts request
 	GetScriptsWithResponse(ctx context.Context, params *GetScriptsParams, reqEditors ...RequestEditorFn) (*GetScriptsResponse, error)
 
+	// GetScriptsByCluster request
+	GetScriptsByClusterWithResponse(ctx context.Context, clusterId string, params *GetScriptsByClusterParams, reqEditors ...RequestEditorFn) (*GetScriptsByClusterResponse, error)
+
 	// GetAllJobs request
 	GetAllJobsWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*GetAllJobsResponse, error)
 
@@ -1903,6 +1980,28 @@ func (r GetScriptsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetScriptsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetScriptsByClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Scripts
+}
+
+// Status returns HTTPResponse.Status
+func (r GetScriptsByClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetScriptsByClusterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2190,6 +2289,15 @@ func (c *ClientWithResponses) GetScriptsWithResponse(ctx context.Context, params
 		return nil, err
 	}
 	return ParseGetScriptsResponse(rsp)
+}
+
+// GetScriptsByClusterWithResponse request returning *GetScriptsByClusterResponse
+func (c *ClientWithResponses) GetScriptsByClusterWithResponse(ctx context.Context, clusterId string, params *GetScriptsByClusterParams, reqEditors ...RequestEditorFn) (*GetScriptsByClusterResponse, error) {
+	rsp, err := c.GetScriptsByCluster(ctx, clusterId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetScriptsByClusterResponse(rsp)
 }
 
 // GetAllJobsWithResponse request returning *GetAllJobsResponse
@@ -2512,6 +2620,32 @@ func ParseGetScriptsResponse(rsp *http.Response) (*GetScriptsResponse, error) {
 	return response, nil
 }
 
+// ParseGetScriptsByClusterResponse parses an HTTP response from a GetScriptsByClusterWithResponse call
+func ParseGetScriptsByClusterResponse(rsp *http.Response) (*GetScriptsByClusterResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetScriptsByClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Scripts
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetAllJobsResponse parses an HTTP response from a GetAllJobsWithResponse call
 func ParseGetAllJobsResponse(rsp *http.Response) (*GetAllJobsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2719,57 +2853,58 @@ func ParseGetTestScriptRunLogsResponse(rsp *http.Response) (*GetTestScriptRunLog
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"+b8AAAD//25A8djLVwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
