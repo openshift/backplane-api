@@ -453,7 +453,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Logs'
 
-  /backplane/cloud/credentials/assume-role-sequence/{cluster_id}:
+  /backplane/cloud/credentials/assume-role-sequence/{clusterId}:
     get:
       operationId: getAssumeRoleSequence
       summary: Get assume-role-sequence for a cluster
