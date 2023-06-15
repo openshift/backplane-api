@@ -452,6 +452,57 @@ paths:
             application/octet-stream:
               schema:
                 $ref: '#/components/schemas/Logs'
+
+  /backplane/cloud/credentials/assume-role-sequence/{clusterId}:
+    get:
+      operationId: getAssumeRoleSequence
+      summary: Get assume-role-sequence for a cluster
+      parameters:
+        - *cluster-id-param
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssumeRoleSequenceResponse'
+        400:
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        503:
+          description: Handler disabled
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Cluster not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        406:
+          description: Not acceptable
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /backplane/cloud/credentials/{clusterId}:
     get:
       operationId: getCloudCredentials
@@ -599,6 +650,32 @@ components:
             - Succeeded
             - Failed
             - Pending
+
+    AssumeRoleSequenceResponse:
+      description: Response for assume role handler
+      type: object
+      required:
+        - assumptionSequence
+      properties:
+        assumptionSequence:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssumableRole"
+          description: Role ARNs to assume in order
+
+    AssumableRole:
+      description: Roles and there corresponding ARN
+      type: object
+      required:
+        - name
+        - arn
+      properties:
+        name:
+          type: string
+          description: Human readable
+        arn:
+          type: string
+          description: ARN for the assumable role
 
     CloudCredentialsResponse:
       description: Response for cloud handler
