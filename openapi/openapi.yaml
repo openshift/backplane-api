@@ -179,37 +179,6 @@ paths:
         500:
           <<: *base-errors
 
-
-  /backplane/script:
-    get:
-      operationId: getScripts
-      summary: Get list of backplane scripts the user has access to
-      parameters:
-        - in: query
-          name: scriptname
-          required: false
-          schema:
-            type: string
-      responses:
-        403:
-          <<: *base-errors
-          description: Forbidden
-        404:
-          <<: *base-errors
-          description: Script Not Found
-        500:
-          <<: *base-errors
-          description: Unable to get available scripts
-        400:
-          <<: *base-errors
-          description: Bad Request
-        200:
-          description: Successful
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Scripts'
-
   /backplane/script/{clusterId}:
     get:
       operationId: getScriptsByCluster
