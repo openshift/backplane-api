@@ -589,6 +589,9 @@ components:
         scriptBody:
           type: string
           description: Base64 encoded script body to run
+        baseImageOverride:
+          type: string
+          description: Container image tag to override default managed-scripts base image during test job run.
         dryRun:
           type: boolean
           description: Flag to indicate whether to generate a template or execute the script
