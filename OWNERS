@@ -1,7 +1,6 @@
 reviewers:
   - wanghaoran1988
   - feichashao
-  - supreeth7
   - MitaliBhalla
   - Tafhim
   - bmeng
@@ -11,7 +10,6 @@ approvers:
   - cblecker
   - jharrington22
   - feichashao
-  - supreeth7 # temp
   - bmeng
 
 maintainers:
