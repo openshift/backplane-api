@@ -803,6 +803,9 @@ components:
           description: The script language
           type: string
           enum: *script-lang
+        customerDataAccess:
+          description: Whether or not the script has access to customer data
+          type: boolean
     RoleRbacDecl:
       type: object
       properties:
@@ -934,6 +937,7 @@ components:
         - language
         - allowedGroups
         - labels
+        - customerDataAccess
       properties:
         file:
           type: string
@@ -963,3 +967,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LabelDecl"
+        customerDataAccess:
+          type: boolean
+
