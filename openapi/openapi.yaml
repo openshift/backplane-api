@@ -120,10 +120,10 @@ paths:
             type: string
           description: The version to return. Default is JSON, v2 is streaming
         - in : query
-          name: follow  
+          name: follow
           schema:
             type: boolean
-          description: Specify if the logs should be followed.   
+          description: Specify if the logs should be followed.
 
         - *cluster-id-param
       responses:
@@ -382,7 +382,7 @@ paths:
             type: string
           description: The version to return. Default is JSON, v2 is streaming
         - in : query
-          name: follow  
+          name: follow
           schema:
             type: boolean
           description: Specify if the logs should be followed.
@@ -797,12 +797,15 @@ components:
         labels:
           type: array
           items:
-            type: 
+            type:
           description: An array of labels for the script
         language:
           description: The script language
           type: string
           enum: *script-lang
+        customerDataAccess:
+          description: Whether or not the script has access to customer data
+          type: boolean
     RoleRbacDecl:
       type: object
       properties:
@@ -934,6 +937,7 @@ components:
         - language
         - allowedGroups
         - labels
+        - customerDataAccess
       properties:
         file:
           type: string
@@ -963,3 +967,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LabelDecl"
+        customerDataAccess:
+          type: boolean
+
