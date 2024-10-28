@@ -55,6 +55,12 @@ paths:
   /backplane/login/{clusterId}/:
     parameters:
       - *cluster-id-param
+      - name: remediation
+        in: query
+        description: The name of a remediation for which RBAC should be created
+        required: false
+        schema:
+          type: string
     post:
       operationId: loginCluster
       summary: Login to a cluster
