@@ -52,7 +52,7 @@ paths:
     head: *k8s-proxy
     trace: *k8s-proxy
 
-  /backplane/login/{clusterId}/:
+  /backplane/login/{clusterId}:
     parameters:
       - *cluster-id-param
       - name: remediation
