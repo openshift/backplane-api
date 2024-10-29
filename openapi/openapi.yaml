@@ -78,6 +78,22 @@ paths:
         500:
           <<: *base-errors
 
+  /backplane/remediation/{clusterId}:
+    parameters:
+      - *cluster-id-param
+    delete:
+      operationId: deleteRemediation
+      summary: Delete RBAC objects created for a remediation
+      responses:
+        200:
+          description: Deletion successful
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+
   /backplane/testscript/{clusterId}:
     post:
       operationId: createTestScriptRun
