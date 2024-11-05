@@ -52,15 +52,27 @@ paths:
     head: *k8s-proxy
     trace: *k8s-proxy
 
-  /backplane/login/{clusterId}:
+  /backplane/remediate/{clusterId}/{remediation}/:
     parameters:
       - *cluster-id-param
       - name: remediation
-        in: query
-        description: The name of a remediation for which RBAC should be created
-        required: false
+        in: path
+        description: remediation name, determines the serviceaccount to use for proxying
+        required: true
         schema:
           type: string
+    get: *k8s-proxy
+    post: *k8s-proxy
+    patch: *k8s-proxy
+    delete: *k8s-proxy
+    put: *k8s-proxy
+    options: *k8s-proxy
+    head: *k8s-proxy
+    trace: *k8s-proxy
+
+  /backplane/login/{clusterId}:
+    parameters:
+      - *cluster-id-param
     post:
       operationId: loginCluster
       summary: Login to a cluster
@@ -70,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: "#/components/schemas/LoginResponse"
         400:
           <<: *base-errors
         403:
@@ -81,9 +93,39 @@ paths:
   /backplane/remediation/{clusterId}:
     parameters:
       - *cluster-id-param
+    post:
+      operationId: createRemediation
+      summary: Creates service account and RBAC for remediation
+      parameters:
+        - name: remediation
+          in: query
+          description: The name of a remediation for which RBAC should be created
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns a LoginResponse with the uri to proxy for
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        500:
+          <<: *base-errors
     delete:
       operationId: deleteRemediation
-      summary: Delete RBAC objects created for a remediation
+      summary: Deletes RBAC created for a remediation
+      parameters:
+        - name: remediation
+          in: query
+          description: remediation name ( locked down to remediation users + validation that SA is owned by remediation user )
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: Deletion successful
