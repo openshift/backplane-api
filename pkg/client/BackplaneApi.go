@@ -310,6 +310,18 @@ type TestJobResult struct {
 // TestJobResultStatus Test run status
 type TestJobResultStatus string
 
+// DeleteRemediationParams defines parameters for DeleteRemediation.
+type DeleteRemediationParams struct {
+	// Remediation remediation name ( locked down to remediation users + validation that SA is owned by remediation user )
+	Remediation *string `form:"remediation,omitempty" json:"remediation,omitempty"`
+}
+
+// CreateRemediationParams defines parameters for CreateRemediation.
+type CreateRemediationParams struct {
+	// Remediation The name of a remediation for which RBAC should be created
+	Remediation string `form:"remediation" json:"remediation"`
+}
+
 // GetScriptsByClusterParams defines parameters for GetScriptsByCluster.
 type GetScriptsByClusterParams struct {
 	Scriptname *string `form:"scriptname,omitempty" json:"scriptname,omitempty"`
@@ -447,6 +459,36 @@ type ClientInterface interface {
 
 	// LoginCluster request
 	LoginCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteBackplaneRemediateClusterIdRemediation request
+	DeleteBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetBackplaneRemediateClusterIdRemediation request
+	GetBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// HeadBackplaneRemediateClusterIdRemediation request
+	HeadBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// OptionsBackplaneRemediateClusterIdRemediation request
+	OptionsBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchBackplaneRemediateClusterIdRemediation request
+	PatchBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostBackplaneRemediateClusterIdRemediation request
+	PostBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutBackplaneRemediateClusterIdRemediation request
+	PutBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TraceBackplaneRemediateClusterIdRemediation request
+	TraceBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteRemediation request
+	DeleteRemediation(ctx context.Context, clusterId string, params *DeleteRemediationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateRemediation request
+	CreateRemediation(ctx context.Context, clusterId string, params *CreateRemediationParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetScriptsByCluster request
 	GetScriptsByCluster(ctx context.Context, clusterId string, params *GetScriptsByClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -614,6 +656,126 @@ func (c *Client) TraceBackplaneClusterClusterId(ctx context.Context, clusterId s
 
 func (c *Client) LoginCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewLoginClusterRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) HeadBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewHeadBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) OptionsBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOptionsBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TraceBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTraceBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteRemediation(ctx context.Context, clusterId string, params *DeleteRemediationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteRemediationRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateRemediation(ctx context.Context, clusterId string, params *CreateRemediationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateRemediationRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1146,7 +1308,7 @@ func NewLoginClusterRequest(server string, clusterId string) (*http.Request, err
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/backplane/login/%s/", pathParam0)
+	operationPath := fmt.Sprintf("/backplane/login/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1155,6 +1317,438 @@ func NewLoginClusterRequest(server string, clusterId string) (*http.Request, err
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteBackplaneRemediateClusterIdRemediationRequest generates requests for DeleteBackplaneRemediateClusterIdRemediation
+func NewDeleteBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetBackplaneRemediateClusterIdRemediationRequest generates requests for GetBackplaneRemediateClusterIdRemediation
+func NewGetBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewHeadBackplaneRemediateClusterIdRemediationRequest generates requests for HeadBackplaneRemediateClusterIdRemediation
+func NewHeadBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("HEAD", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewOptionsBackplaneRemediateClusterIdRemediationRequest generates requests for OptionsBackplaneRemediateClusterIdRemediation
+func NewOptionsBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("OPTIONS", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchBackplaneRemediateClusterIdRemediationRequest generates requests for PatchBackplaneRemediateClusterIdRemediation
+func NewPatchBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostBackplaneRemediateClusterIdRemediationRequest generates requests for PostBackplaneRemediateClusterIdRemediation
+func NewPostBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPutBackplaneRemediateClusterIdRemediationRequest generates requests for PutBackplaneRemediateClusterIdRemediation
+func NewPutBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewTraceBackplaneRemediateClusterIdRemediationRequest generates requests for TraceBackplaneRemediateClusterIdRemediation
+func NewTraceBackplaneRemediateClusterIdRemediationRequest(server string, clusterId string, remediation string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "remediation", runtime.ParamLocationPath, remediation)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediate/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("TRACE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteRemediationRequest generates requests for DeleteRemediation
+func NewDeleteRemediationRequest(server string, clusterId string, params *DeleteRemediationParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Remediation != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "remediation", runtime.ParamLocationQuery, *params.Remediation); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateRemediationRequest generates requests for CreateRemediation
+func NewCreateRemediationRequest(server string, clusterId string, params *CreateRemediationParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/remediation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "remediation", runtime.ParamLocationQuery, params.Remediation); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
 	if err != nil {
@@ -1702,6 +2296,36 @@ type ClientWithResponsesInterface interface {
 	// LoginCluster request
 	LoginClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*LoginClusterResponse, error)
 
+	// DeleteBackplaneRemediateClusterIdRemediation request
+	DeleteBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*DeleteBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// GetBackplaneRemediateClusterIdRemediation request
+	GetBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*GetBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// HeadBackplaneRemediateClusterIdRemediation request
+	HeadBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*HeadBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// OptionsBackplaneRemediateClusterIdRemediation request
+	OptionsBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*OptionsBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// PatchBackplaneRemediateClusterIdRemediation request
+	PatchBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*PatchBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// PostBackplaneRemediateClusterIdRemediation request
+	PostBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*PostBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// PutBackplaneRemediateClusterIdRemediation request
+	PutBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*PutBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// TraceBackplaneRemediateClusterIdRemediation request
+	TraceBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*TraceBackplaneRemediateClusterIdRemediationResponse, error)
+
+	// DeleteRemediation request
+	DeleteRemediationWithResponse(ctx context.Context, clusterId string, params *DeleteRemediationParams, reqEditors ...RequestEditorFn) (*DeleteRemediationResponse, error)
+
+	// CreateRemediation request
+	CreateRemediationWithResponse(ctx context.Context, clusterId string, params *CreateRemediationParams, reqEditors ...RequestEditorFn) (*CreateRemediationResponse, error)
+
 	// GetScriptsByCluster request
 	GetScriptsByClusterWithResponse(ctx context.Context, clusterId string, params *GetScriptsByClusterParams, reqEditors ...RequestEditorFn) (*GetScriptsByClusterResponse, error)
 
@@ -1984,6 +2608,217 @@ func (r LoginClusterResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r LoginClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type HeadBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r HeadBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r HeadBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type OptionsBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r OptionsBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r OptionsBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r PostBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r PutBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TraceBackplaneRemediateClusterIdRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r TraceBackplaneRemediateClusterIdRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TraceBackplaneRemediateClusterIdRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *LoginResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateRemediationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2293,6 +3128,96 @@ func (c *ClientWithResponses) LoginClusterWithResponse(ctx context.Context, clus
 		return nil, err
 	}
 	return ParseLoginClusterResponse(rsp)
+}
+
+// DeleteBackplaneRemediateClusterIdRemediationWithResponse request returning *DeleteBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) DeleteBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*DeleteBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.DeleteBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// GetBackplaneRemediateClusterIdRemediationWithResponse request returning *GetBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) GetBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*GetBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.GetBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// HeadBackplaneRemediateClusterIdRemediationWithResponse request returning *HeadBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) HeadBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*HeadBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.HeadBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseHeadBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// OptionsBackplaneRemediateClusterIdRemediationWithResponse request returning *OptionsBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) OptionsBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*OptionsBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.OptionsBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOptionsBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// PatchBackplaneRemediateClusterIdRemediationWithResponse request returning *PatchBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) PatchBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*PatchBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.PatchBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// PostBackplaneRemediateClusterIdRemediationWithResponse request returning *PostBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) PostBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*PostBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.PostBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// PutBackplaneRemediateClusterIdRemediationWithResponse request returning *PutBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) PutBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*PutBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.PutBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// TraceBackplaneRemediateClusterIdRemediationWithResponse request returning *TraceBackplaneRemediateClusterIdRemediationResponse
+func (c *ClientWithResponses) TraceBackplaneRemediateClusterIdRemediationWithResponse(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*TraceBackplaneRemediateClusterIdRemediationResponse, error) {
+	rsp, err := c.TraceBackplaneRemediateClusterIdRemediation(ctx, clusterId, remediation, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTraceBackplaneRemediateClusterIdRemediationResponse(rsp)
+}
+
+// DeleteRemediationWithResponse request returning *DeleteRemediationResponse
+func (c *ClientWithResponses) DeleteRemediationWithResponse(ctx context.Context, clusterId string, params *DeleteRemediationParams, reqEditors ...RequestEditorFn) (*DeleteRemediationResponse, error) {
+	rsp, err := c.DeleteRemediation(ctx, clusterId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteRemediationResponse(rsp)
+}
+
+// CreateRemediationWithResponse request returning *CreateRemediationResponse
+func (c *ClientWithResponses) CreateRemediationWithResponse(ctx context.Context, clusterId string, params *CreateRemediationParams, reqEditors ...RequestEditorFn) (*CreateRemediationResponse, error) {
+	rsp, err := c.CreateRemediation(ctx, clusterId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateRemediationResponse(rsp)
 }
 
 // GetScriptsByClusterWithResponse request returning *GetScriptsByClusterResponse
@@ -2624,6 +3549,176 @@ func ParseLoginClusterResponse(rsp *http.Response) (*LoginClusterResponse, error
 	return response, nil
 }
 
+// ParseDeleteBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a DeleteBackplaneRemediateClusterIdRemediationWithResponse call
+func ParseDeleteBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*DeleteBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseGetBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a GetBackplaneRemediateClusterIdRemediationWithResponse call
+func ParseGetBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*GetBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseHeadBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a HeadBackplaneRemediateClusterIdRemediationWithResponse call
+func ParseHeadBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*HeadBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &HeadBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseOptionsBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a OptionsBackplaneRemediateClusterIdRemediationWithResponse call
+func ParseOptionsBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*OptionsBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &OptionsBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParsePatchBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a PatchBackplaneRemediateClusterIdRemediationWithResponse call
+func ParsePatchBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*PatchBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParsePostBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a PostBackplaneRemediateClusterIdRemediationWithResponse call
+func ParsePostBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*PostBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParsePutBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a PutBackplaneRemediateClusterIdRemediationWithResponse call
+func ParsePutBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*PutBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseTraceBackplaneRemediateClusterIdRemediationResponse parses an HTTP response from a TraceBackplaneRemediateClusterIdRemediationWithResponse call
+func ParseTraceBackplaneRemediateClusterIdRemediationResponse(rsp *http.Response) (*TraceBackplaneRemediateClusterIdRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TraceBackplaneRemediateClusterIdRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseDeleteRemediationResponse parses an HTTP response from a DeleteRemediationWithResponse call
+func ParseDeleteRemediationResponse(rsp *http.Response) (*DeleteRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseCreateRemediationResponse parses an HTTP response from a CreateRemediationWithResponse call
+func ParseCreateRemediationResponse(rsp *http.Response) (*CreateRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest LoginResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetScriptsByClusterResponse parses an HTTP response from a GetScriptsByClusterWithResponse call
 func ParseGetScriptsByClusterResponse(rsp *http.Response) (*GetScriptsByClusterResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2857,62 +3952,67 @@ func ParseGetTestScriptRunLogsResponse(rsp *http.Response) (*GetTestScriptRunLog
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+w8WXPjNtJ/BcXve9hNUdJkjlTKbz7ixM4cKsmzyVZmagskWyJsEOAAoGztlP77Fg7e",
-	"0GGPNeXYfpNwdAN9obvR4Ncg5lnOGTAlg4OvgYxTyLD5eShlkeGIwoRT0A0JyFiQXBHOgoNAt0qEWYJU",
-	"CgJQzIUAmXOWEDZHh5P3QRjkgucgFAEDEAvWB3M4eY9mXGggCJcYkdAow0AtcwgOAqkEYfNgFQYMZ56l",
-	"/FZkmCEBONGT+/NWYSDgS0EEJMHBXxZIaJbzuRrLo0uIlcZh9m02PYUvBbAYJmZf0kcE12O2YJZv145S",
-	"zBIKok8DPcbMLoH7KasJKJHiJVDCEBeJAUgUZAbW/wuYBQfB/41qFo4c/0Zt5q2qbWIh8LJHEc+qfJQ5",
-	"prxIjgUkwBTBVO5Il1hPW0uRmBZSgTg76UM5rro8ohBzJjmFt4Rd9WfqVk09LVVuYIi46cXUC63elW8d",
-	"egONIZthCZibeX2i6PZNcztsiRv7lwqrQh7zZA1rBGAF5zzSaDsExowzEmP63qs8uhXxmSGVbdeEEwXz",
-	"bS3HAmegQFhhThJitzJuYexN66g8ynCuUdbQKhNgx4UoK6RCESCMZhQrZDdqrE2GVZyC/MT08AaEBGKK",
-	"BSSIMwMpA4UTrPCnxkZKeq3WUvACpHJUbC/6iCdLK816nDZxGCmQCl3yqCfTEZZwluE5fFiAECTxkP2Y",
-	"M4UJA4GIHogUnmu6czcBJTDDBVUowwzPIRnYuRJp0G5KUmj6VqvQPBv6mJaI5aTwyOMptTgJS0iMFaDr",
-	"FLQt121zYCB0m95lllP9kwsENxAXChqsqhFGnFPA7BGJSRhYPJr3HonAEn56jYDFPIGk1J1Iy8l6BbKj",
-	"3jmk26z4tD26ax8aq+tB9hmJX9jiBGLaNxGtjfVOaNT4X1oKYAu0wMK3xSvwEOt3WDam+qZVVrE3949S",
-	"LFMiS8SISI8drURw5d/9BDAlUhOvS4E7LnqBaeFR7gstc4LHICUkyAzaSjjvkoXgor/YDKTEcw9eMx69",
-	"c90+8atPkb4XdXExRnYA0iJdzydMwRyEf43eM+eSR2eJR5QYKhj5UgAiibE85kCdLS1rnQ3zrfuSR1Oz",
-	"sm0ac14NXIXr6XSIUqD5rKDIDSl9hUKCV6Z1+7uTN31I707elJzVY9B1yu0JAcYvdqfDDqw+b+6wTUxg",
-	"HlL+wpLRKWFEpkiR7gkehMGMiwyr4CBIsIKBHhKEASsoNS7ygRIFePYJbCF95DJuo8YBbEEEZxkwtd4u",
-	"7+qkNjWy56JaZ1/mOF7jtJiujucSgT4RBd5ge3ezuU5ZhOrjnurmWxB9jRL2ATvd6wIFVmTa2o/BhFZB",
-	"GEwKxuyvaRHHAAkkQRicYkLNj4/sivFrTYLfCdVNn3eSwLc4Anqn8yESBGa+U4JqkHc5I9ZONLbUQ7t/",
-	"mfZKDjvz66inv2s+J2x9IGO6S6soymHhrgY5W2+Kc8Fvlv8pBPEQoojgcHyGzBD0cXJ2W1O+xYrbbXss",
-	"DXWtPRpUUpnzZDd7NuaUxMtJYVMHnSA4J78KXuTmT2UpejtsMS8MbgYc52SgNzUHNoAbJfBAYbviJc6o",
-	"HltCDnmmAefKsp1xzWNeiBg+Tt7eP94O/A524bqM1bp33C3oazDvD2sX4wJEdP/YDNQWJp/MTY4Ojz1h",
-	"99HhsXP7sWlak4GYcApaXtur33RUNGT8btvqYu5yj99mNQZKhGNjwu/IVN5dxGrHiRGOO4tvLadnAlpn",
-	"ez+Dcl9s8IrJtPIDOmaJUn4NSW2aumEIiVM0N70IC0BuvIv2rA/bd4A2i/8qDHChUuvld85V0952B0I0",
-	"JyotIuNsujxmP5e1OeFzWlC6RF8KTMmMQIJYLwEUImKDY+vP6E4tGWfJyPbrGcNP7J0Lvq1LH6J3E0TY",
-	"IKfaLYtTiE0GDtiMixgMdT553bK4kIpnIE6wwoexjpnWh4BcIMZV0+NLsUTYzNLYSljIxMC+1MRdXRmH",
-	"DrMEXadYIaJQwkEGuzvRzO9FL7Ag2if/Bifaq/GrMDBe0Jal2DHrcXvBsnnhdXcuakJVg2oHNl+q1Jjf",
-	"CMvU45SGQY5V2oc6xipFM8Ezs0IBOUeCc1XGbN08VAMciAxTb4J4XHa1oaAZoYA402rmTe1GON5qh/Up",
-	"pB20lAt1slnczBgtrg2BM6ywEqGljRKp5G4+17SXXOpELnaPZcqrfznRNYB3MWI76vdWzVyrVt+qFZrF",
-	"XgS1uuyEoo6XtujI7vJfXm/du9xtvmcwFAnLe7EmHzzQKl67VTnGNLYcdgSpoqxXFj5Xgrs76esYvUt3",
-	"l7+fgCyoWpPF18dZ696ulULfFNztHMrrZRinwA2ojeCW2L0M8n3SoVfpzao1kmrGeGjkzp5582kd9ju4",
-	"n33XJBLiQhC1nGrKW3ocARYgtHdirjrMv9My8XF5rYJuIv/8jwuk+BUwpCXHpKo1MK39ZnK9wFSp3Dqd",
-	"hM24Z6fjM3TKBYpwfJVTzIz7Q5TW5+CobBscjnXAvAAh7awfhy+GL2yKGRjOSXAQvBq+GL4K7IFjNjWq",
-	"QI7MdeXI3RqOvpaXcMlKj5uDkSotHyaY0PwIfgVlr0btnKB9AfKX75R0UJEOygXDFH38aK75iB5gjsHS",
-	"GlS3gFo8arbZBJ5VCJ+GfzbBnxFys8GXL16YWIczBUzZKDynJDa7GF1KaydqeJvUb+09sGFde7MfrjTl",
-	"X/ew/zD6YXeENg/ugX6EEzSBLwVIZdG82guaUy4ikiTALJLXe0HibruNgzvjBUsssp/2guw9V8Ztzo2n",
-	"oTG92ROLzkoJn4JYgEDlwDCQRZZhsbQK5KoEnNqhQlBnm534mxl9La2FcGQrJQY6UhlIV8awq/r2az4e",
-	"vRJvKHN5VuNnNd5RjTXC/TDrN1svhBIi9d4Sj8nwafxtrcatzvdGkdDzGf9sHJ6NwwM2DnG3aG+bZTDN",
-	"TXswsgEIBQV9m3Bi2qugwzH2uKXHDdX88c8/++GMblyFwUtf30vb98rX98r2vfb1vbZ9b3x9urFNqLG5",
-	"YbwqIogVHfEY4ZwgYZXNVDliE1eyOuIa6ABqFa41lE+XIingpE+S3wAnT5cmtkRL9snywXY8Xco8CO8h",
-	"xypO+8wZ6+YnzBouPbZtzOUTNm554SNJ8YQpooS7vW7T5EI3P1WqtF0qyueE9Ryqh2H4vCpuir0cr4I9",
-	"xlbtmjOPe+uqzgpzQzIraIgEqEIw6UrCCkHKK3rbgepLwH2FYZVPv68ArBE07HUHLUm3lFZ8fWBgIeya",
-	"J3A3WUfLWow6Am/E+EsBYlnLcV1WEWwS3PDRZRnKiz8Pt6aV9D8nF3ZD4q73ddh/WuYW9qVLH5l5p2le",
-	"CimEF5iYwnJ37Sg98Tgl0lQSVZpVjq2L51u1PNv1cHRpnx6sTepTes4j+a2WfKcb6XMeeYrPemQ751F5",
-	"JfzIhHr/gmafVVSvKjzpYErLS3xZHo9VneFaKQsfskdSP+u04EBWj9HuJ8tbwV+1qwL0ild7NPwVynVG",
-	"ny6ReX8BCcKW38/6co/6YhlvSTs0R4biKDKPpWeFhARdE5Wiq5/dqyxX7L2bTR59Nc+/VtvTp1awt+qf",
-	"K2/RKzk76b2P8WihfX52Gw18UK7V8+3K3ZDo07V1s7J/JbPyXSuZxvnyu+IMKzEFT3wzVTy3Wm7K0f5h",
-	"RFkUufpnaKpLBWR8YUrZKyWXSAC1Dxh59TBzU8p/YovmdtRi+4SccPY0dHmfp+WkYGWd3+N0KvccKdWi",
-	"+J2thgn/q5p7vzerVbZeYMnf25y/o/I53zrFPeeReQf4gI9gV8Vp3tiYTNcQnbgvYxCJzqcf3odo8VL/",
-	"lkoAzmxprS/HUtaD3moJ0xxiMlsi4p6l8rlEMuUFTbSzNOO2znm4BqXt92FsfKjg0RkrI1JaUJsgeKxA",
-	"DSyPbg2qp0ljnlheOEF8hPHBI/KRZqDitNIfX2rIsRI3q9Y7pk6BVP5U7KbI+QKkS8nu6KR8H83bVyBf",
-	"fr3oOwfz7UcXvrIn880k95iu/Tqhccthxf7HfUmjebVC/gvJ316HD8dnRoertOv3vjWp6r0+vH/7b6SX",
-	"4xLByr17kSHijC4biWGinSw2yAVPitjIQuMRpNxN20df7VOVjTcwt1Z559pY0NWHrxIULd0XD/SWrMo2",
-	"0ioMrqvd+u2De1bztCOXraaheiklzBD5bAT+1kagTDp+HzuwNcJpGYNbxjoP1iA8x0TPMdEGQ2qd7Gcr",
-	"+lhcKcPQ29vRxuNdY+eaz3b/+qylXZpifWsFC0Hd+1t5MBq1yrqGuSALrGCYkgUMnW4NeQ5MpmSmhjHP",
-	"Ag3uZhBhCQOThZb7rRC6GbhlDEgyMPbc/y2KvdsMvZSrn+XAlGXpAY+75vHGfYZ2QDGbez5psPpfAAAA",
-	"//9V5FWkT1wAAA==",
+	"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",
+	"SnU6Gc5sAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
