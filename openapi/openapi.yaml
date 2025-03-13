@@ -136,6 +136,64 @@ paths:
         500:
           <<: *base-errors
 
+  /backplane/testremediation/{clusterId}:
+    parameters:
+      - *cluster-id-param
+    post:
+      operationId: createTestRemediation
+      summary: Internal ONLY API to creates service account and RBAC for remediation from request body. Only available in non-production environments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestRemediation"
+      parameters:
+        - name: remediation
+          in: query
+          description: The name of a remediation for which RBAC should be created
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns a LoginResponse with the uri to proxy for
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+    delete:
+      operationId: deleteTestRemediation
+      summary: Internal ONLY API to delete RBAC for remediation from request body. Only available in non-production environments
+      parameters:
+        - name: remediation
+          in: query
+          description: remediation name ( locked down to remediation users + validation that SA is owned by remediation user )
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestRemediation"
+      responses:
+        200:
+          description: Deletion successful
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+
   /backplane/testscript/{clusterId}:
     post:
       operationId: createTestScriptRun
@@ -640,6 +698,40 @@ components:
       bearerFormat: jwt
       description: JWT token auth
   schemas:
+
+    TestRemediation:
+      description: Body for TestRemediation
+      type: object
+      required:
+        - remediationMetadata
+      properties:
+        remediationMetadata:
+          $ref: "#/components/schemas/RemediationMetadata"
+
+    RemediationMetadata:
+      description: Metadata
+      required:
+        - name
+        - rbac
+        - clusterVersions
+        - labels
+        - customerDataAccess
+      properties:
+        name:
+          type: string
+        rbac:
+          type: object
+          $ref: "#/components/schemas/RBAC"
+        clusterVersions:
+          type: array
+          items: 
+            type: string
+        labels:
+          type: array
+          items:
+            $ref: "#/components/schemas/LabelDecl"
+        customerDataAccess:
+          type: boolean
 
     CreateTestJob:
       description: Body for creating a test job

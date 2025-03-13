@@ -224,6 +224,17 @@ type RBAC struct {
 	Roles            *[]RoleRbacDecl `json:"roles,omitempty" yaml:"roles,omitempty"`
 }
 
+// RemediationMetadata Metadata
+type RemediationMetadata struct {
+	ClusterVersions    []string    `json:"clusterVersions"`
+	CustomerDataAccess bool        `json:"customerDataAccess"`
+	Labels             []LabelDecl `json:"labels"`
+	Name               string      `json:"name"`
+
+	// Rbac RBAC declaration
+	Rbac RBAC `json:"rbac" yaml:"rbac,omitempty"`
+}
+
 // RoleRbacDecl defines model for RoleRbacDecl.
 type RoleRbacDecl struct {
 	Namespace *string       `json:"namespace,omitempty"`
@@ -310,6 +321,12 @@ type TestJobResult struct {
 // TestJobResultStatus Test run status
 type TestJobResultStatus string
 
+// TestRemediation Body for TestRemediation
+type TestRemediation struct {
+	// RemediationMetadata Metadata
+	RemediationMetadata RemediationMetadata `json:"remediationMetadata"`
+}
+
 // DeleteRemediationParams defines parameters for DeleteRemediation.
 type DeleteRemediationParams struct {
 	// Remediation remediation name ( locked down to remediation users + validation that SA is owned by remediation user )
@@ -336,6 +353,18 @@ type GetJobLogsParams struct {
 	Follow *bool `form:"follow,omitempty" json:"follow,omitempty"`
 }
 
+// DeleteTestRemediationParams defines parameters for DeleteTestRemediation.
+type DeleteTestRemediationParams struct {
+	// Remediation remediation name ( locked down to remediation users + validation that SA is owned by remediation user )
+	Remediation *string `form:"remediation,omitempty" json:"remediation,omitempty"`
+}
+
+// CreateTestRemediationParams defines parameters for CreateTestRemediation.
+type CreateTestRemediationParams struct {
+	// Remediation The name of a remediation for which RBAC should be created
+	Remediation string `form:"remediation" json:"remediation"`
+}
+
 // GetTestScriptRunLogsParams defines parameters for GetTestScriptRunLogs.
 type GetTestScriptRunLogsParams struct {
 	// Version The version to return. Default is JSON, v2 is streaming
@@ -347,6 +376,12 @@ type GetTestScriptRunLogsParams struct {
 
 // CreateJobJSONRequestBody defines body for CreateJob for application/json ContentType.
 type CreateJobJSONRequestBody = CreateJob
+
+// DeleteTestRemediationJSONRequestBody defines body for DeleteTestRemediation for application/json ContentType.
+type DeleteTestRemediationJSONRequestBody = TestRemediation
+
+// CreateTestRemediationJSONRequestBody defines body for CreateTestRemediation for application/json ContentType.
+type CreateTestRemediationJSONRequestBody = TestRemediation
 
 // CreateTestScriptRunJSONRequestBody defines body for CreateTestScriptRun for application/json ContentType.
 type CreateTestScriptRunJSONRequestBody = CreateTestJob
@@ -509,6 +544,16 @@ type ClientInterface interface {
 
 	// GetJobLogs request
 	GetJobLogs(ctx context.Context, clusterId string, jobId string, params *GetJobLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteTestRemediation request with any body
+	DeleteTestRemediationWithBody(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DeleteTestRemediation(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, body DeleteTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateTestRemediation request with any body
+	CreateTestRemediationWithBody(ctx context.Context, clusterId string, params *CreateTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateTestRemediation(ctx context.Context, clusterId string, params *CreateTestRemediationParams, body CreateTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateTestScriptRun request with any body
 	CreateTestScriptRunWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -860,6 +905,54 @@ func (c *Client) GetRun(ctx context.Context, clusterId string, jobId string, req
 
 func (c *Client) GetJobLogs(ctx context.Context, clusterId string, jobId string, params *GetJobLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetJobLogsRequest(c.Server, clusterId, jobId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteTestRemediationWithBody(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteTestRemediationRequestWithBody(c.Server, clusterId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteTestRemediation(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, body DeleteTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteTestRemediationRequest(c.Server, clusterId, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateTestRemediationWithBody(ctx context.Context, clusterId string, params *CreateTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTestRemediationRequestWithBody(c.Server, clusterId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateTestRemediation(ctx context.Context, clusterId string, params *CreateTestRemediationParams, body CreateTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTestRemediationRequest(c.Server, clusterId, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2052,6 +2145,136 @@ func NewGetJobLogsRequest(server string, clusterId string, jobId string, params 
 	return req, nil
 }
 
+// NewDeleteTestRemediationRequest calls the generic DeleteTestRemediation builder with application/json body
+func NewDeleteTestRemediationRequest(server string, clusterId string, params *DeleteTestRemediationParams, body DeleteTestRemediationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeleteTestRemediationRequestWithBody(server, clusterId, params, "application/json", bodyReader)
+}
+
+// NewDeleteTestRemediationRequestWithBody generates requests for DeleteTestRemediation with any type of body
+func NewDeleteTestRemediationRequestWithBody(server string, clusterId string, params *DeleteTestRemediationParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/testremediation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Remediation != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "remediation", runtime.ParamLocationQuery, *params.Remediation); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCreateTestRemediationRequest calls the generic CreateTestRemediation builder with application/json body
+func NewCreateTestRemediationRequest(server string, clusterId string, params *CreateTestRemediationParams, body CreateTestRemediationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateTestRemediationRequestWithBody(server, clusterId, params, "application/json", bodyReader)
+}
+
+// NewCreateTestRemediationRequestWithBody generates requests for CreateTestRemediation with any type of body
+func NewCreateTestRemediationRequestWithBody(server string, clusterId string, params *CreateTestRemediationParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/testremediation/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "remediation", runtime.ParamLocationQuery, params.Remediation); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewCreateTestScriptRunRequest calls the generic CreateTestScriptRun builder with application/json body
 func NewCreateTestScriptRunRequest(server string, clusterId string, body CreateTestScriptRunJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -2345,6 +2568,16 @@ type ClientWithResponsesInterface interface {
 
 	// GetJobLogs request
 	GetJobLogsWithResponse(ctx context.Context, clusterId string, jobId string, params *GetJobLogsParams, reqEditors ...RequestEditorFn) (*GetJobLogsResponse, error)
+
+	// DeleteTestRemediation request with any body
+	DeleteTestRemediationWithBodyWithResponse(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteTestRemediationResponse, error)
+
+	DeleteTestRemediationWithResponse(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, body DeleteTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteTestRemediationResponse, error)
+
+	// CreateTestRemediation request with any body
+	CreateTestRemediationWithBodyWithResponse(ctx context.Context, clusterId string, params *CreateTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTestRemediationResponse, error)
+
+	CreateTestRemediationWithResponse(ctx context.Context, clusterId string, params *CreateTestRemediationParams, body CreateTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTestRemediationResponse, error)
 
 	// CreateTestScriptRun request with any body
 	CreateTestScriptRunWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTestScriptRunResponse, error)
@@ -2956,6 +3189,49 @@ func (r GetJobLogsResponse) StatusCode() int {
 	return 0
 }
 
+type DeleteTestRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteTestRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteTestRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateTestRemediationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *LoginResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateTestRemediationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateTestRemediationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type CreateTestScriptRunResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3280,6 +3556,40 @@ func (c *ClientWithResponses) GetJobLogsWithResponse(ctx context.Context, cluste
 		return nil, err
 	}
 	return ParseGetJobLogsResponse(rsp)
+}
+
+// DeleteTestRemediationWithBodyWithResponse request with arbitrary body returning *DeleteTestRemediationResponse
+func (c *ClientWithResponses) DeleteTestRemediationWithBodyWithResponse(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteTestRemediationResponse, error) {
+	rsp, err := c.DeleteTestRemediationWithBody(ctx, clusterId, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteTestRemediationResponse(rsp)
+}
+
+func (c *ClientWithResponses) DeleteTestRemediationWithResponse(ctx context.Context, clusterId string, params *DeleteTestRemediationParams, body DeleteTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteTestRemediationResponse, error) {
+	rsp, err := c.DeleteTestRemediation(ctx, clusterId, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteTestRemediationResponse(rsp)
+}
+
+// CreateTestRemediationWithBodyWithResponse request with arbitrary body returning *CreateTestRemediationResponse
+func (c *ClientWithResponses) CreateTestRemediationWithBodyWithResponse(ctx context.Context, clusterId string, params *CreateTestRemediationParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTestRemediationResponse, error) {
+	rsp, err := c.CreateTestRemediationWithBody(ctx, clusterId, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTestRemediationResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateTestRemediationWithResponse(ctx context.Context, clusterId string, params *CreateTestRemediationParams, body CreateTestRemediationJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTestRemediationResponse, error) {
+	rsp, err := c.CreateTestRemediation(ctx, clusterId, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTestRemediationResponse(rsp)
 }
 
 // CreateTestScriptRunWithBodyWithResponse request with arbitrary body returning *CreateTestScriptRunResponse
@@ -3868,6 +4178,48 @@ func ParseGetJobLogsResponse(rsp *http.Response) (*GetJobLogsResponse, error) {
 	return response, nil
 }
 
+// ParseDeleteTestRemediationResponse parses an HTTP response from a DeleteTestRemediationWithResponse call
+func ParseDeleteTestRemediationResponse(rsp *http.Response) (*DeleteTestRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteTestRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseCreateTestRemediationResponse parses an HTTP response from a CreateTestRemediationWithResponse call
+func ParseCreateTestRemediationResponse(rsp *http.Response) (*CreateTestRemediationResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateTestRemediationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest LoginResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCreateTestScriptRunResponse parses an HTTP response from a CreateTestScriptRunWithResponse call
 func ParseCreateTestScriptRunResponse(rsp *http.Response) (*CreateTestScriptRunResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -3952,67 +4304,69 @@ func ParseGetTestScriptRunLogsResponse(rsp *http.Response) (*GetTestScriptRunLog
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"SnU6Gc5sAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
