@@ -95,21 +95,21 @@ paths:
       - *cluster-id-param
     post:
       operationId: createRemediation
-      summary: Creates service account and RBAC for remediation
+      summary: Instantiates a new remediation instance & creates the service account (SA) and RBAC on the target cluster used by that instance
       parameters:
-        - name: remediation
+        - name: remediationName
           in: query
-          description: The name of a remediation for which RBAC should be created
+          description: The name of a remediation which must be instantiated
           required: true
           schema:
             type: string
       responses:
         200:
-          description: Returns a LoginResponse with the uri to proxy for
+          description: Returns a RemediationLoginResponse with the uri to use to proxy oc commands; the response also contains the id to use to delete the remediation instance
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
+                $ref: "#/components/schemas/RemediationLoginResponse"
         400:
           <<: *base-errors
         403:
@@ -118,12 +118,12 @@ paths:
           <<: *base-errors
     delete:
       operationId: deleteRemediation
-      summary: Deletes RBAC created for a remediation
+      summary: Deletes an existing remediation instance; deletes the service account (SA) and RBAC created for the remediation instance
       parameters:
-        - name: remediation
+        - name: remediationInstanceId
           in: query
-          description: remediation name ( locked down to remediation users + validation that SA is owned by remediation user )
-          required: false
+          description: the id of the remediation instance previously instantiated by backplane
+          required: true
           schema:
             type: string
       responses:
@@ -969,6 +969,17 @@ components:
         message:
           type: string
           description: message
+    
+    RemediationLoginResponse:
+      allOf:
+        - $ref: "#/components/schemas/LoginResponse"
+        - type: object
+          required:
+            - remediationInstanceId
+          properties:
+            remediationInstanceId:
+              type: string
+              description: the id of the remediation instance - used to locate the SA & RBAC created by backplane on the target cluster
 
     RBAC:
       description: RBAC declaration
