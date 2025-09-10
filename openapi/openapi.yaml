@@ -275,6 +275,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Scripts'
 
+  /backplane/script/{clusterId}/all:
+    get:
+      operationId: getAllScriptsByCluster
+      summary: Get list of all backplane scripts regardless of user permissions
+      parameters:
+        - *cluster-id-param
+      responses:
+        403:
+          <<: *base-errors
+          description: Forbidden
+        500:
+          <<: *base-errors
+          description: Unable to get available scripts
+        400:
+          <<: *base-errors
+          description: Bad Request
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scripts'
+
   /backplane/script/{clusterId}/job:
     parameters:
       - *cluster-id-param
