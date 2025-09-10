@@ -4,6 +4,12 @@ reviewers:
   - MitaliBhalla
   - Tafhim
   - bmeng
+  - diakovnec
+  - xiaoyu74
+  - smarthall
+  - a7vicky
+  - Dee-6777
+  - samanthajayasinghe
 
 approvers:
   - wanghaoran1988
@@ -11,6 +17,13 @@ approvers:
   - jharrington22
   - feichashao
   - bmeng
+  - diakovnec
+  - xiaoyu74
+  - smarthall
+  - a7vicky
+  - Dee-6777
+  - MitaliBhalla
+  - samanthajayasinghe
 
 maintainers:
   - wanghaoran1988
