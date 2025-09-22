@@ -9,11 +9,13 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -24,6 +26,28 @@ import (
 const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
+
+// Input validation patterns and functions
+var (
+	alphanumericHyphen          = regexp.MustCompile(`^[A-Za-z0-9-]+$`)
+	lowercaseAlphanumericHyphen = regexp.MustCompile(`^[a-z0-9-]+$`)
+	scriptNameFilter            = regexp.MustCompile(`^[A-Za-z0-9_\-\/]+$`)
+	containerImage              = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9._-]*(?:[:/][a-zA-Z0-9._-]+)*(?::[a-zA-Z0-9._-]+)?$`)
+)
+
+func validateInput(s string, max int, pattern *regexp.Regexp, optional bool) error {
+	s = strings.TrimSpace(s)
+	if len(s) == 0 {
+		if optional {
+			return nil
+		}
+		return errors.New("invalid input")
+	}
+	if len(s) > max || !pattern.MatchString(s) {
+		return errors.New("invalid input")
+	}
+	return nil
+}
 
 // Defines values for JobStatusStatus.
 const (
@@ -682,6 +706,9 @@ func (c *Client) LoginCluster(ctx context.Context, clusterId string, reqEditors 
 }
 
 func (c *Client) DeleteBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewDeleteBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -694,6 +721,9 @@ func (c *Client) DeleteBackplaneRemediateClusterIdRemediation(ctx context.Contex
 }
 
 func (c *Client) GetBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewGetBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -706,6 +736,9 @@ func (c *Client) GetBackplaneRemediateClusterIdRemediation(ctx context.Context, 
 }
 
 func (c *Client) HeadBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewHeadBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -718,6 +751,9 @@ func (c *Client) HeadBackplaneRemediateClusterIdRemediation(ctx context.Context,
 }
 
 func (c *Client) OptionsBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewOptionsBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -730,6 +766,9 @@ func (c *Client) OptionsBackplaneRemediateClusterIdRemediation(ctx context.Conte
 }
 
 func (c *Client) PatchBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewPatchBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -742,6 +781,9 @@ func (c *Client) PatchBackplaneRemediateClusterIdRemediation(ctx context.Context
 }
 
 func (c *Client) PostBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewPostBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -754,6 +796,9 @@ func (c *Client) PostBackplaneRemediateClusterIdRemediation(ctx context.Context,
 }
 
 func (c *Client) PutBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewPutBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -766,6 +811,9 @@ func (c *Client) PutBackplaneRemediateClusterIdRemediation(ctx context.Context, 
 }
 
 func (c *Client) TraceBackplaneRemediateClusterIdRemediation(ctx context.Context, clusterId string, remediation string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(remediation, 63, alphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewTraceBackplaneRemediateClusterIdRemediationRequest(c.Server, clusterId, remediation)
 	if err != nil {
 		return nil, err
@@ -778,6 +826,11 @@ func (c *Client) TraceBackplaneRemediateClusterIdRemediation(ctx context.Context
 }
 
 func (c *Client) DeleteRemediation(ctx context.Context, clusterId string, params *DeleteRemediationParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if params != nil {
+		if err := validateInput(params.RemediationInstanceId, 255, alphanumericHyphen, false); err != nil {
+			return nil, err
+		}
+	}
 	req, err := NewDeleteRemediationRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
@@ -802,6 +855,11 @@ func (c *Client) CreateRemediation(ctx context.Context, clusterId string, params
 }
 
 func (c *Client) GetScriptsByCluster(ctx context.Context, clusterId string, params *GetScriptsByClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if params != nil && params.Scriptname != nil {
+		if err := validateInput(*params.Scriptname, 255, scriptNameFilter, true); err != nil {
+			return nil, err
+		}
+	}
 	req, err := NewGetScriptsByClusterRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
@@ -898,6 +956,19 @@ func (c *Client) CreateTestScriptRunWithBody(ctx context.Context, clusterId stri
 }
 
 func (c *Client) CreateTestScriptRun(ctx context.Context, clusterId string, body CreateTestScriptRunJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	s := strings.TrimSpace(body.ScriptBody)
+	if len(s) == 0 || len(s) > 1048576 {
+		return nil, errors.New("invalid script body")
+	}
+	if _, err := base64.StdEncoding.DecodeString(s); err != nil {
+		return nil, errors.New("invalid script body")
+	}
+	if body.BaseImageOverride != nil {
+		s := strings.TrimSpace(*body.BaseImageOverride)
+		if len(s) > 512 || !containerImage.MatchString(s) || strings.Contains(s, "..") || strings.Contains(s, "//") {
+			return nil, errors.New("invalid base image")
+		}
+	}
 	req, err := NewCreateTestScriptRunRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
@@ -910,6 +981,9 @@ func (c *Client) CreateTestScriptRun(ctx context.Context, clusterId string, body
 }
 
 func (c *Client) GetTestScriptRun(ctx context.Context, clusterId string, testId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(testId, 255, lowercaseAlphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewGetTestScriptRunRequest(c.Server, clusterId, testId)
 	if err != nil {
 		return nil, err
@@ -922,6 +996,9 @@ func (c *Client) GetTestScriptRun(ctx context.Context, clusterId string, testId 
 }
 
 func (c *Client) GetTestScriptRunLogs(ctx context.Context, clusterId string, testId string, params *GetTestScriptRunLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	if err := validateInput(testId, 255, lowercaseAlphanumericHyphen, false); err != nil {
+		return nil, err
+	}
 	req, err := NewGetTestScriptRunLogsRequest(c.Server, clusterId, testId, params)
 	if err != nil {
 		return nil, err
