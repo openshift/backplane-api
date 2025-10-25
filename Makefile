@@ -12,10 +12,7 @@ OAPI_CODEGEN_VERSION=v2.5.0
 generate-in-container:
 	$(RUN_IN_CONTAINER_CMD) "make generate"
 
-ensure-oapi-codegen:
-	@ls $(GOPATH)/bin/oapi-codegen 1>/dev/null || go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@${OAPI_CODEGEN_VERSION}
-
-generate: ensure-oapi-codegen
+generate:
 	$(shell mkdir -p pkg/client)
-	oapi-codegen -config oapi-codegen.yaml openapi/openapi.yaml
+	go tool oapi-codegen -config oapi-codegen.yaml openapi/openapi.yaml
 	go generate -v ./...
