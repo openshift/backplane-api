@@ -1,0 +1,8 @@
+package: Openapi
+output: pkg/client/BackplaneApi.go
+generate:
+  models: true
+  client: true
+  embedded-spec: true
+output-options:
+  skip-prune: true
