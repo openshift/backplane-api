@@ -1,5 +1,7 @@
-# Backplane-API
+# backplane-api
 
-## What it does 
+This repository contains the API schema for `backplane-api`, and a generated client SDK, utilizing `openapi-codegen`.
 
-This repo only hosts the OpenAPI definitions and generated client package.
+## Contributing
+
+To make changes to the API, modify `openapi/openapi.yaml`. Then, generate the client SDK with `make generate`.
