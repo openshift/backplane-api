@@ -70,7 +70,7 @@ paths:
           required: false
           schema:
             type: integer
-            description: Number of hours to filter reports (e.g., 24 for last 24 hours)
+            description: Number of reports to return, sorted by timestamp descending (default 10)
       responses:
         200:
           description: Successful retrieval of reports
@@ -1177,9 +1177,10 @@ components:
       description: A single report for a cluster
       type: object
       required:
-        - report_id
         - created_at
         - data
+        - report_id
+        - summary
       properties:
         report_id:
           type: string
