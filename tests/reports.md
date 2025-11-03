@@ -66,25 +66,25 @@ go test -v ./tests/reports_test.go
 
 ```bash
 # Test creating a report
-go test -v -run TestCreateReport ./integration_test.go
+go test -v -run TestCreateReport ./tests/reports_test.go
 
 # Test listing reports
-go test -v -run TestListReports ./integration_test.go
+go test -v -run TestListReports ./tests/reports_test.go
 
 # Test end-to-end workflow
-go test -v -run TestReportsEndToEnd ./integration_test.go
+go test -v -run TestReportsEndToEnd ./tests/reports_test.go
 ```
 
 ### Run with Timeout
 
 ```bash
-go test -v -timeout 30s ./integration_test.go
+go test -v -timeout 30s ./tests/reports_test.go
 ```
 
 ### Run with Verbose Output
 
 ```bash
-go test -v -count=1 ./integration_test.go
+go test -v -count=1 ./tests/reports_test.go
 ```
 
 ## Test Descriptions
