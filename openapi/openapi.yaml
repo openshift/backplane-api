@@ -5,6 +5,7 @@ info:
   version: 1.0.0
 servers:
   - url: 'https://backplane-api.private.hive.cluster.openshift.com'
+
 x-cluster-id-param: &cluster-id-param
   name: clusterId
   in: path
@@ -51,6 +52,96 @@ paths:
     options: *k8s-proxy
     head: *k8s-proxy
     trace: *k8s-proxy
+
+  /backplane/cluster/{cluster_id}/reports:
+    parameters:
+      - name: cluster_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: The cluster internal UUID
+    get:
+      operationId: getReportsByCluster
+      summary: Get list of reports for a cluster
+      parameters:
+        - in: query
+          name: last
+          required: false
+          schema:
+            type: integer
+            description: Number of reports to return, sorted by timestamp descending (default 10)
+      responses:
+        200:
+          description: Successful retrieval of reports
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListReports'
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        404:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+    post:
+      operationId: createReport
+      summary: Create a new report for a cluster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReport'
+      responses:
+        201:
+          description: Report successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+
+  /backplane/cluster/{cluster_id}/reports/{report_id}:
+    parameters:
+      - name: cluster_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: The cluster internal UUID
+      - name: report_id
+        in: path
+        description: The unique report ID
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getReportById
+      summary: Get a specific report by ID
+      responses:
+        200:
+          description: Successful retrieval of report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        404:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+
 
   /backplane/remediate/{clusterId}/{remediation}/:
     parameters:
@@ -1068,3 +1159,61 @@ components:
         customerDataAccess:
           type: boolean
 
+    CreateReport:
+      description: Request body for creating a new report
+      type: object
+      required:
+        - data
+        - summary
+      properties:
+        summary:
+          type: string
+          description: A summary name for the report
+        data:
+          type: string
+          description: Report content, base64 encoded
+
+    Report:
+      description: A single report for a cluster
+      type: object
+      required:
+        - created_at
+        - data
+        - report_id
+        - summary
+      properties:
+        report_id:
+          type: string
+          description: Unique identifier for the report
+        summary:
+          type: string
+          description: A summary name for the report
+        created_at:
+          type: string
+          format: date-time
+          description: When the report was generated
+        data:
+          type: string
+          description: Report content, base64 encoded
+
+    ListReports:
+      description: A list of reports for a cluster
+      type: object
+      properties:
+        clusterId:
+          type: string
+          description: The cluster internal UUID
+        reports:
+          type: array
+          items:
+            properties:
+              report_id:
+                type: string
+                description: Unique identifier for the report
+              summary:
+                type: string
+                description: A summary name for the report
+              created_at:
+                type: string
+                format: date-time
+                description: When the report was generated

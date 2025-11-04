@@ -95,6 +95,15 @@ type CreateJob struct {
 	Parameters *map[string]string `json:"parameters,omitempty"`
 }
 
+// CreateReport Request body for creating a new report
+type CreateReport struct {
+	// Data Report content, base64 encoded
+	Data string `json:"data"`
+
+	// Summary A summary name for the report
+	Summary string `json:"summary"`
+}
+
 // CreateTestJob Body for creating a test job
 type CreateTestJob struct {
 	// BaseImageOverride Container image tag to override default managed-scripts base image during test job run.
@@ -191,6 +200,22 @@ type LabelDecl struct {
 	Values *[]interface{} `json:"values,omitempty"`
 }
 
+// ListReports A list of reports for a cluster
+type ListReports struct {
+	// ClusterId The cluster internal UUID
+	ClusterId *string `json:"clusterId,omitempty"`
+	Reports   *[]struct {
+		// CreatedAt When the report was generated
+		CreatedAt *time.Time `json:"created_at,omitempty"`
+
+		// ReportId Unique identifier for the report
+		ReportId *string `json:"report_id,omitempty"`
+
+		// Summary A summary name for the report
+		Summary *string `json:"summary,omitempty"`
+	} `json:"reports,omitempty"`
+}
+
 // LoginResponse Login status response
 type LoginResponse struct {
 	// Message message
@@ -255,6 +280,21 @@ type RemediationLoginResponse struct {
 
 	// StatusCode status code
 	StatusCode *int `json:"statusCode,omitempty"`
+}
+
+// Report A single report for a cluster
+type Report struct {
+	// CreatedAt When the report was generated
+	CreatedAt time.Time `json:"created_at"`
+
+	// Data Report content, base64 encoded
+	Data string `json:"data"`
+
+	// ReportId Unique identifier for the report
+	ReportId string `json:"report_id"`
+
+	// Summary A summary name for the report
+	Summary string `json:"summary"`
 }
 
 // RoleRbacDecl defines model for RoleRbacDecl.
@@ -343,6 +383,11 @@ type TestJobResult struct {
 // TestJobResultStatus Test run status
 type TestJobResultStatus string
 
+// GetReportsByClusterParams defines parameters for GetReportsByCluster.
+type GetReportsByClusterParams struct {
+	Last *int `form:"last,omitempty" json:"last,omitempty"`
+}
+
 // DeleteRemediationParams defines parameters for DeleteRemediation.
 type DeleteRemediationParams struct {
 	// RemediationInstanceId the id of the remediation instance previously instantiated by backplane
@@ -377,6 +422,9 @@ type GetTestScriptRunLogsParams struct {
 	// Follow Specify if the logs should be followed.
 	Follow *bool `form:"follow,omitempty" json:"follow,omitempty"`
 }
+
+// CreateReportJSONRequestBody defines body for CreateReport for application/json ContentType.
+type CreateReportJSONRequestBody = CreateReport
 
 // CreateJobJSONRequestBody defines body for CreateJob for application/json ContentType.
 type CreateJobJSONRequestBody = CreateJob
@@ -489,6 +537,17 @@ type ClientInterface interface {
 
 	// TraceBackplaneClusterClusterId request
 	TraceBackplaneClusterClusterId(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetReportsByCluster request
+	GetReportsByCluster(ctx context.Context, clusterId string, params *GetReportsByClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateReportWithBody request with any body
+	CreateReportWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateReport(ctx context.Context, clusterId string, body CreateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetReportById request
+	GetReportById(ctx context.Context, clusterId string, reportId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// LoginCluster request
 	LoginCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -680,6 +739,54 @@ func (c *Client) PutBackplaneClusterClusterId(ctx context.Context, clusterId str
 
 func (c *Client) TraceBackplaneClusterClusterId(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewTraceBackplaneClusterClusterIdRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetReportsByCluster(ctx context.Context, clusterId string, params *GetReportsByClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetReportsByClusterRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateReportWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateReportRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateReport(ctx context.Context, clusterId string, body CreateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateReportRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetReportById(ctx context.Context, clusterId string, reportId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetReportByIdRequest(c.Server, clusterId, reportId)
 	if err != nil {
 		return nil, err
 	}
@@ -1333,6 +1440,150 @@ func NewTraceBackplaneClusterClusterIdRequest(server string, clusterId string) (
 	}
 
 	req, err := http.NewRequest("TRACE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetReportsByClusterRequest generates requests for GetReportsByCluster
+func NewGetReportsByClusterRequest(server string, clusterId string, params *GetReportsByClusterParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "cluster_id", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/cluster/%s/reports", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Last != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last", runtime.ParamLocationQuery, *params.Last); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateReportRequest calls the generic CreateReport builder with application/json body
+func NewCreateReportRequest(server string, clusterId string, body CreateReportJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateReportRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewCreateReportRequestWithBody generates requests for CreateReport with any type of body
+func NewCreateReportRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "cluster_id", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/cluster/%s/reports", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetReportByIdRequest generates requests for GetReportById
+func NewGetReportByIdRequest(server string, clusterId string, reportId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "cluster_id", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "report_id", runtime.ParamLocationPath, reportId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/cluster/%s/reports/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2381,6 +2632,17 @@ type ClientWithResponsesInterface interface {
 	// TraceBackplaneClusterClusterIdWithResponse request
 	TraceBackplaneClusterClusterIdWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*TraceBackplaneClusterClusterIdResponse, error)
 
+	// GetReportsByClusterWithResponse request
+	GetReportsByClusterWithResponse(ctx context.Context, clusterId string, params *GetReportsByClusterParams, reqEditors ...RequestEditorFn) (*GetReportsByClusterResponse, error)
+
+	// CreateReportWithBodyWithResponse request with any body
+	CreateReportWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateReportResponse, error)
+
+	CreateReportWithResponse(ctx context.Context, clusterId string, body CreateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateReportResponse, error)
+
+	// GetReportByIdWithResponse request
+	GetReportByIdWithResponse(ctx context.Context, clusterId string, reportId string, reqEditors ...RequestEditorFn) (*GetReportByIdResponse, error)
+
 	// LoginClusterWithResponse request
 	LoginClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*LoginClusterResponse, error)
 
@@ -2677,6 +2939,72 @@ func (r TraceBackplaneClusterClusterIdResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r TraceBackplaneClusterClusterIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetReportsByClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListReports
+}
+
+// Status returns HTTPResponse.Status
+func (r GetReportsByClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetReportsByClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *Report
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetReportByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Report
+}
+
+// Status returns HTTPResponse.Status
+func (r GetReportByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetReportByIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3234,6 +3562,41 @@ func (c *ClientWithResponses) TraceBackplaneClusterClusterIdWithResponse(ctx con
 	return ParseTraceBackplaneClusterClusterIdResponse(rsp)
 }
 
+// GetReportsByClusterWithResponse request returning *GetReportsByClusterResponse
+func (c *ClientWithResponses) GetReportsByClusterWithResponse(ctx context.Context, clusterId string, params *GetReportsByClusterParams, reqEditors ...RequestEditorFn) (*GetReportsByClusterResponse, error) {
+	rsp, err := c.GetReportsByCluster(ctx, clusterId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetReportsByClusterResponse(rsp)
+}
+
+// CreateReportWithBodyWithResponse request with arbitrary body returning *CreateReportResponse
+func (c *ClientWithResponses) CreateReportWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateReportResponse, error) {
+	rsp, err := c.CreateReportWithBody(ctx, clusterId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateReportResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateReportWithResponse(ctx context.Context, clusterId string, body CreateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateReportResponse, error) {
+	rsp, err := c.CreateReport(ctx, clusterId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateReportResponse(rsp)
+}
+
+// GetReportByIdWithResponse request returning *GetReportByIdResponse
+func (c *ClientWithResponses) GetReportByIdWithResponse(ctx context.Context, clusterId string, reportId string, reqEditors ...RequestEditorFn) (*GetReportByIdResponse, error) {
+	rsp, err := c.GetReportById(ctx, clusterId, reportId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetReportByIdResponse(rsp)
+}
+
 // LoginClusterWithResponse request returning *LoginClusterResponse
 func (c *ClientWithResponses) LoginClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*LoginClusterResponse, error) {
 	rsp, err := c.LoginCluster(ctx, clusterId, reqEditors...)
@@ -3640,6 +4003,84 @@ func ParseTraceBackplaneClusterClusterIdResponse(rsp *http.Response) (*TraceBack
 	response := &TraceBackplaneClusterClusterIdResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseGetReportsByClusterResponse parses an HTTP response from a GetReportsByClusterWithResponse call
+func ParseGetReportsByClusterResponse(rsp *http.Response) (*GetReportsByClusterResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetReportsByClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListReports
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateReportResponse parses an HTTP response from a CreateReportWithResponse call
+func ParseCreateReportResponse(rsp *http.Response) (*CreateReportResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest Report
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetReportByIdResponse parses an HTTP response from a GetReportByIdWithResponse call
+func ParseGetReportByIdResponse(rsp *http.Response) (*GetReportByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetReportByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Report
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil
@@ -4100,72 +4541,78 @@ func ParseGetTestScriptRunLogsResponse(rsp *http.Response) (*GetTestScriptRunLog
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+w9XXMbu61/hbP3PrSdlZXPM2fcJ8dueuyeJB4pue2dk8wdaheSGHPJDcmVrZvRf++A",
-	"5K72g/pKrNSx9CZzSYAEARAAQfhrlMgslwKE0dHp10gnU8io/XmmdZHREYeB5IANKehEsdwwKaLTCFs1",
-	"oSIlZgoKSCKVAp1LkTIxIWeDt1Ec5UrmoAwDC5Aq0QVzNnhLxlIhEEJLjEQhyjgy8xyi00gbxcQkWsSR",
-	"oFlgKr8VGRVEAU1xcHfcIo4UfCmYgjQ6/cMBie10PlV95egzJAZx2HXbRQ/hSwEigYFdlw4RwX+xS7DT",
-	"d3MnUypSDqpLA+xjR5fAw5RFAmpiZAmUCSJVagEyA5mF9d8KxtFp9F/95Rb2/f71m5u3qJZJlaLzDkUC",
-	"swpR5pzLIj1XkIIwjHK9JV0SHLaSIgkvtAF1edGFcl59CrBCIoWWHH5n4qY7EluReshVvmNMpP1KeRDa",
-	"clWheeACal3Ww1IwseO6RMH2dWNb25LU1q8NNYU+l+mKrVFADVzJEaJtEZgKKVhC+dug8GArkWNLKteO",
-	"hFOFCC0tp4pmYEA5Zk5T5pZy3cDYGdYSeZLRHFEuoVUqwPWLSVZoQ0ZAKBlzaohbqNU2GTXJFPRHgd1r",
-	"EFJIOFWQEikspAwMTamhH2sLKem1WEnB96CNp2Jz0q9kOnfcjP1QxVFiQBvyWY46PD2iGi4zOoF3M1CK",
-	"pQGyn0thKBOgCMOOxNAJ0l36ASSFMS24IRkVdAJpz43VBEH7IWmB9K1mgXt2Etq0VM0HRYAfX3OHk4mU",
-	"JdQAuZ0C6nJsm4AAhW24yizn+FMqAneQFAZqW7VEOJKSAxWPiE3iyOHBvQ9wBNXwywsCIpEppKXsjJBP",
-	"VguQ6/XGI92kxYfN3m39UJtdB3JISfxNzC4g4V0V0VhY54Qmtb9LTQFiRmZUhZZ4AwFi/QPmtaGhYZVW",
-	"7Iz9Z8mWU6ZLxITpgB6tWHARXv0AKGcaidemwDdOekZ5ERDu98hzSiagNaTEdtpIuOCUlZKqO9kMtKaT",
-	"AF7bn7zxn0PstzxFulbU+/fXxHUgyNLL8UwYmIAKzzF45nyWo8s0wEqCFIJ9KYCw1Goee6CO525rvQ4L",
-	"zfuzHA3tzDZJzFXVcRGvptMZmQLPxwUnvktpKxQagjyN7W8uXnYhvbl4We4s9iG3U+lOCLB2sT8dttjq",
-	"q/oKm8QEESDl30Taf80E01NiWPsEj+JoLFVGTXQapdRAD7tEcSQKzq2JfGpUAYF1gpjpELms2Yg4QMyY",
-	"kiIDYVbr5W2N1LpEdkxUZ+zrnCYrjBb7qWW5jABPREXX6N7tdK4XFmW6uIfYvAPRVwhhF7CXvTZQEEWG",
-	"2v4arGsVxdGgEML9GhZJApBCGsXRa8q4/fFB3Ah5iyT4B+PY9GkrDvydjoB/0/kwUgzGoVOCI8hvOSNW",
-	"DrS6NEC7/7HtFR+2xi+9nu6q5YSJ1Y6M/VxqRVV2i7dVyNlqVZwreTf/v0KxACGKEZxdXxLbhXwYXO6q",
-	"yjdocbfsgKbhvrVDg4orc5lup8/QEJk9Ha5g9TNy86smro+nbkxupyyZkoQKtOjcxDifo5rBU3Q0JzLp",
-	"3xQjSAxHfZ0ynXM6J5QsqdzyfFafcwpMocQqCqEpaigL+YLUWoyzpyduaReun7c8Y1KIAifLBBnR5Cbn",
-	"VABJCqVAGD4PWZjbn1FhV5PqsEy6L8R1RWrOGFqppU/MGQizi3JqrLoUCD+syxCLOLqWnCXzQeFiR60o",
-	"SM7+rmSR2z+qo6Izl4b0xtFdT9Kc9XDPJiB6cGcU7RnqWHZOM459S8ixzBBwbpzcC4lCLguVwIfB7/eP",
-	"twW/hV35T/bYunfcDegrMO8PaxvjDNTo/rFZqA1MIaUzeHV2Hoi7vDo7934ftU0rQlADyQH5tTn7dbZC",
-	"jce/bVltzO3dk7vMxkIZ0cSe4d+4qbI9icWWA0c0aU1+ABmkzFK8c8hSzt+No9M/1i+oOWwRt9WIWmK4",
-	"FNpQkUDI60CFx9LyBKsNIsyPIj1i1baRhEsbCsGewzPysXjy5NkvxHJQadaP5jXd7qMIhqoJGOK3c2Ng",
-	"Lzzxrsv+CclY39WOJm3YyN3j4b64OShtw8qebml3zuUtpEsN33bn8Zif2K+EKiC+v4+aOF+w60is1yKL",
-	"OKKFmTpvuXUW2vamWR2TCTPTYmSdNn8f0I0Jrw+cvi7QOvlSUM7GDFIiOoHUGO0A/NP5BfgRBewy7bvv",
-	"OOLko3jjg1jONY7JmwFhopdzdG+SKSQ2kg1iLFUCljofg+5NUmgjM1AX1NCzJAGtV4dSpCJCmrrnNKWa",
-	"UDsKsZWwiI0lhUJ83+oSeHRUpOR2Sg1hhqQSdLS9MyrC3uiMKoa+7Xc4o0HFuYgj601smIrrsxp3EKyY",
-	"FEHb7/2SUFWnpSOYz83UnmIjqqcB5y6OcmqmXajX1EzJWMnM68FcEiWlKW3Cdjy3Bg5URnnwouW6/NSE",
-	"QsaMW+U4YUGIeFxsPM7wMEeLdCqVuVjPbrYPsmuN4exWOI5AbuNMG72d7zLsBGlbEQC3xjJ03L3kayvA",
-	"b1FiW8r3RslcKVbfKxW4xUEES3HZCsUy7rBBRrbn//Ka+N75bv2xbikSl/fL9X0IQKv22s/Kb0xtyXGL",
-	"kSrKBnnhU8W425N+Getq093fgw1AF9ysuA3D46xx/924iloXJNna68RpWKPAd1gqwQ0xsDJYFuIOnGUw",
-	"Ol0LTlvlgci9PgvGpVvb7+F+Cl03akgKxcx8iJR39HgFVIFC68ReGdq/XpcBxM+3JmpfiF398z0x8gYE",
-	"Qc6xVz4IDKXfDl5OcGpM7mx3JsYysNLrS/JaqqUdi0OZQXmOXpVtvbPry8j6c9qNenry5OSJu6oBQXMW",
-	"nUbPT56cPI/cgWMX1a9A9u21f9/fvve/lpfZ6QL7TcByFfKHM4PT6DT6OxiXYuDGRM2LxD9Cp6SHSpgw",
-	"aMhx8uGDvS5n2MEeg6U2qG7TkT2W2+YC4U4gQhL+yfrQlsntAp89eeJCS8KAMC6YkXOW2FX0P/tozBLe",
-	"OvFbmU9ht6652Hc3SPkXHex/6f9le4TuPikA/RVNyQC+FKCNQ/N8L2heSzViaQrCIXmxFyQ+a8QauGNZ",
-	"iNQh+2UvyN5KY83m3FoaiOnlnrbosuTwIagZKFJ2jCNdZBlVcydAPtvGix0pFPe6ufRNcURXSpdM2HcZ",
-	"Rz30VHrapwNtK77d3KlHL8Rr0sWOYnwU4y3FGBHuZ7N+c3l3JGUa15YGVEZI4nfVGjud77Vku+MZf1QO",
-	"R+XwgJVD0k5+3aQZbHNdH/SdA8LBQFcnXNj2yunwG3vekOOaaD7917+67gw2LuLoWejbM/fteejbc/ft",
-	"RejbC/ftZegbNjYJdW1v6v3ldF8mhOaMKCdsNluYWr+ydivcQwdqEa9UlIdLkSnQtEuS34Cmh0sTl+qo",
-	"u2R55z4cLmUehPWQU5NMu5tzjc0HvDVSB3TbtdQHrNzyIkSS4oApYpS/vW7S5D02HypVmiYVlxMm2g7W",
-	"w9B7QQm3aRvnVSrE3lyrVnpI17r1yZuFvSAZFzz2aX/aZ1YWipU39D4fcHkHuC8vrDLp9+V/1XyGva6g",
-	"weiO0kau9gvKlJdGKLH/tZYJs5OfUCYXQaUSaulGR6fhsMmzhQdx2ATa2p04bDL958/YuI21nr2IkGOS",
-	"4gQzJkC7/BtQM5YATRJZCJvbU/jreXvmuSvzwPxUa1/v2/s5cE7a7AodOIE2+UWHTZ6tnKRDJlHY2ESf",
-	"ouU3rbcvmwRbq/+3yCrPFcyYLDSf+zbDOhnkpTb+UoCaB9VxLUP8Hi61mouwq8Y5L52ko/Ozq/PjWEcT",
-	"KgjcMW2LQ4T44a8k9T1rBzUpT+o/Dc/+bBNVG48NynziELyHE/4Mnm6uoMYOEoXTLZPoaWPF7mVgWeyh",
-	"Lkubxeety8Z8GLfBK9/EBFht4GMVlKwaRW6Zmbq354qVpp6RProhE5LILKMi1X/1POSHUa4lSVwBEseM",
-	"7jm+H+64dC3bHRXELgricsmwuJ0CbsPnhX9t5GR/Gy0RfH3knjKN5sTY9xXVrjWPSDfnbdM2fGLxq/ky",
-	"rNcS5ZAULl+5RDs5OT990keZhx3gj+EPOWgfU66Hf23xVhryukz12Jf0fhC2/JwtgGQInVFm62X4LHAd",
-	"SI/gTNuHXcsngWWlpqomSONp1WY57FPO1+ZYcr5ZHI8C9fML1MNjcsp5gNEVTKhKOfK3HDuWz0FlTGsb",
-	"ZNzM8J9dCaE1DH8lR/p7r5K2ehFzJUeBx68dEl7JUfkk5ch0OzKdM2+q6kiBdFTOy0dEuryfq945r1Sr",
-	"P4EvdGWLQfloRllU7n6yTCv4i+arJJzxYo+KuUK5SinzObF1lCAl1O33UV7uUV7cxjvSnlgbyUj0kRMp",
-	"xtYPsC7iza++upqv2bGdTu5/tWXctgibOcbeKH/+eR3O5PKiU+cqIIWujNx3XZj8J02fY3b3tyHB07WR",
-	"2b1/IavFPLySevnk2Q/FGVdsCoEQwtDI3Em5fQ77J8vKqsjNn2MbDlCQyZktpVEJORpm3BUilFWBxXXZ",
-	"A4NC7CDFrhQsk+IwZHmfp+WgEOU748dpVO45NLBkxR+sNWy8q4rRh61ZFNnlBMv93eX87Zdl+VYJ7pUc",
-	"2Xp+D/gI9q/IbY0fG9c+IRe+wjXT5Gr47m1MZs/wtzYKaFbLU2gFFcv36DtNYZhDwsZzwnx5STnRRE9l",
-	"wVM0lsbS1Vk4WYHSfQ9hrBUcfnTKyrIUMmodhEwMmJ7bo51BdSTpWqZuLzwjPkL/4BHZSGMwybSSn1CY",
-	"yG8lrVfNaKk6A9qE7x7Wec7vQfs7iC2NlB8jefty5Mv/QvCDnflm0ZfQs0v7vw98Ma9mdZROBsHTfXGj",
-	"rZrD/h/Sn16Gz64vrQxXIdgffzHppePd29//l+B0fFDY+Lo7OiZS8HktSMzQyBK9XMm0SCwv1Iqw6e2k",
-	"vf/VlcpZe+W4s8h708aBrv6Bhb8JBYLqpcwkqoVVBNxWqw3rB1/W57A9l42qoarUpGwXfVQCP7USKIOO",
-	"P0YPbPRwGspgR1/nwSqEo0909InWKFJnZB+16GMxpeyG7q5Ha8UDrZ6rlw384xNyu7bFQpwWLBT39f/0",
-	"ab/fSJI+yRWbUQMnUzaDEy9bJzIHoadsbE4SmUUI7q43ohp6Ngqt95uEd9fz0+ixtGf1ebgW7v7f2UR3",
-	"vZtfdc9mTrrS4o/5OcGd/3dyPU7FJFBSdfHvAAAA//8WQNVQF3QAAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
