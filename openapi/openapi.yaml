@@ -1199,8 +1199,11 @@ components:
     ListReports:
       description: A list of reports for a cluster
       type: object
+      required:
+        - cluster_id
+        - reports
       properties:
-        clusterId:
+        cluster_id:
           type: string
           description: The cluster internal UUID
         reports:
