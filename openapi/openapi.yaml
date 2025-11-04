@@ -194,6 +194,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: managingCluster
+          in: query
+          description: If specified, which managing cluster to create kube-api access for ( service | management | hive )
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: Returns a RemediationLoginResponse with the uri to use to proxy oc commands; the response also contains the id to use to delete the remediation instance
@@ -215,6 +221,12 @@ paths:
           in: query
           description: the id of the remediation instance previously instantiated by backplane
           required: true
+          schema:
+            type: string
+        - name: managingCluster
+          in: query
+          description: If specified, which managing cluster to create kube-api access for ( service | management | hive )
+          required: false
           schema:
             type: string
       responses:
