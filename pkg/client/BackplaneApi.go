@@ -55,6 +55,20 @@ const (
 	TestJobResultStatusSucceeded TestJobResultStatus = "Succeeded"
 )
 
+// Defines values for DeleteRemediationParamsManagingCluster.
+const (
+	DeleteRemediationParamsManagingClusterHive       DeleteRemediationParamsManagingCluster = "hive"
+	DeleteRemediationParamsManagingClusterManagement DeleteRemediationParamsManagingCluster = "management"
+	DeleteRemediationParamsManagingClusterService    DeleteRemediationParamsManagingCluster = "service"
+)
+
+// Defines values for CreateRemediationParamsManagingCluster.
+const (
+	CreateRemediationParamsManagingClusterHive       CreateRemediationParamsManagingCluster = "hive"
+	CreateRemediationParamsManagingClusterManagement CreateRemediationParamsManagingCluster = "management"
+	CreateRemediationParamsManagingClusterService    CreateRemediationParamsManagingCluster = "service"
+)
+
 // AssumableRole Roles and there corresponding ARN
 type AssumableRole struct {
 	// Arn ARN for the assumable role
@@ -394,8 +408,11 @@ type DeleteRemediationParams struct {
 	RemediationInstanceId string `form:"remediationInstanceId" json:"remediationInstanceId"`
 
 	// ManagingCluster If specified, which managing cluster to create kube-api access for ( service | management | hive )
-	ManagingCluster *string `form:"managingCluster,omitempty" json:"managingCluster,omitempty"`
+	ManagingCluster *DeleteRemediationParamsManagingCluster `form:"managingCluster,omitempty" json:"managingCluster,omitempty"`
 }
+
+// DeleteRemediationParamsManagingCluster defines parameters for DeleteRemediation.
+type DeleteRemediationParamsManagingCluster string
 
 // CreateRemediationParams defines parameters for CreateRemediation.
 type CreateRemediationParams struct {
@@ -403,8 +420,11 @@ type CreateRemediationParams struct {
 	RemediationName string `form:"remediationName" json:"remediationName"`
 
 	// ManagingCluster If specified, which managing cluster to create kube-api access for ( service | management | hive )
-	ManagingCluster *string `form:"managingCluster,omitempty" json:"managingCluster,omitempty"`
+	ManagingCluster *CreateRemediationParamsManagingCluster `form:"managingCluster,omitempty" json:"managingCluster,omitempty"`
 }
+
+// CreateRemediationParamsManagingCluster defines parameters for CreateRemediation.
+type CreateRemediationParamsManagingCluster string
 
 // GetScriptsByClusterParams defines parameters for GetScriptsByCluster.
 type GetScriptsByClusterParams struct {
@@ -4634,25 +4654,25 @@ var swaggerSpec = []string{
 	"vlgrlTKBfatgcPEmAEq/r/ZKYB8ZftzoGRAmftwIGhwzftxo+s/r2I7pUX90pGcOUaIXmBIG0iZZg1iQ",
 	"GHAc85yZBO7c5WAanWfzIr2WSvNc7zrE/cgpaXO8+5EjaFPw+3GjZ1Ak/DGjyG9sap+i5Tetty+bCFsr",
 	"/wc8Bs0ELAjPJV26NkU6Dz8LadwKtfsfdn6X6jibFl42JEWNBFMPjrBZqclUUXDInIHGbfH0S6uQXwr1",
-	"gv7tSsmZ91X/RnOyAPRrz14KIJVLuHW+VXMn5qw0pivXbu+ybeuyWYKXCDMEN0SaIoQ+Kv4rSlzPmnmB",
-	"Cvvil8vjX80bqsbL5uoNbHe++3Mzvzb0PlgO6OUW7ztxY8eOxdwTzroE2Mz0b+1DoUfK7ncUI+4pG+C9",
-	"d7BxIYz6RqFroua2MpsghVmtuIsk8RjFPE0xS+RfHeW7YZhKbl6tY8IsC9lidW645a21zLIXa9uItbOK",
-	"zWR59eHRza4gg6X+IbLNW6DBVnuIlkiZB8vlqTXNEbvmoXnQ7qXelnfz1bPxYCsx8dNnURcPG9feBe2T",
-	"p4cBcc+X33KFXhW507vi3g/M1Kw35YEVwgtMTDVJ96xSrrnTr6qmFHWMy4qZjVoFm/lwjCld+2iJ0s3s",
-	"uGeon5+h7h+RY0o9hC5ghkVCNX3zqSX5DERKpDQB3c0E/8UW2F1D8Oc8kt97bTfoifk5jzzVZDooPOdR",
-	"8cZ7T3RbEp0z7ovawZ6bd0qLV/myuAstCwf1itWfwIM7N6WSd5c5ZYh3SNrU3QnmEmSfUKZLZKoMQ4Kw",
-	"Pe89v9whv5T5VF94dGBsJMW1Zx9zNjV+gHERr353tcddWcNhMnn8zRQ5HxCitIS9kf9cfopeydlppwq0",
-	"hwttkfXvCjn8J02f/XPJ2wHR2rXxVHL3TFaLeTgh9eLw6Q+FGZZkCp4QwqXimeVyU1/mF0PKIs/Ur6EJ",
-	"BwhI+cLUpiuZXBtm1Jbp5+XPD6zL1JjkbAsutj+UQjh7HLy8S205yVlRuOdhGpU7Dg1UpPiDpYaJd5U3",
-	"C35rVrNstcDifLfRv+Oicnkf457zyJQ8v8cq2JVlql7fHKBT97qGSHR++e5tiBZP9d9SCcBpLSekFVQs",
-	"CjxttYRLc+uwRMT9+AKfSSTnPKeJNpam3BYuO+gBab/7INZ+jufBCStDUppQ61PwWIEa2TPaeqoOJ13w",
-	"xJ6FI8QH6B88IBtpCiqel/zjCxO5o8T1MnQtUadAKv/dwzrP+T1Idwcx0Ej5MZy3K0e++I2+H+zMN6so",
-	"+uqYmF8GdNVxm+UGO3kPT3ZFjaYMJfm/4vXVT8zDxxdnhofLEOyPv5h03PHu7ev/RXo5LiisXCFLGSLO",
-	"6LIWJCbayGKjTPAkjw0t1Koay2HcPv5ma0+uvXLcmuWdaWOnrmq825tQQFq8FFlbtbAKg+tyt3754Opk",
-	"Pm7PZaNoKEufCtNF7oXATy0EiqDjj5EDGz2chjDY0te5twJh7xPtfaI1gtQa2Xsp+lBMKXOg28vRWjVu",
-	"I+fqdbj//KSpXZrqe1YK5oK6gtryaDxuJKQfZIIssIKDOVnAgeOtA54Bk3MyVQcxTwM93c0owhJGJgot",
-	"d5uEdzNyyxiRZGTk+Xavou/uTVNwM7r6XY5M5qT99aWH/HTjxv3Y+ohiNvP8RsHq/wMAAP//o+6xe0yE",
-	"AAA=",
+	"gv7tSsmZ91X/RnOyAPRrz14KIJVLWK26yNnXEwRhUE2qe1lYvoIzPdcBzQ2bI9UHUnmAe89uW8/O8oVE",
+	"mCG4IdLUKvQR+19R4nrWrBBUmCG/XB7/ap5aNR5AV09lu/Pdnwv8tRH6weJCL7d4BoobO3ac6F561gXF",
+	"Ztnw1r4n2kuFnSdr9hYh8N5i2CgTRn2j0DVRc1vnTZDCSFfcxaV4jGKeppgl8q+OQdwwTCU3b+AxYZbT",
+	"bOk7N9yy4Fqe2ku/baTfWcWNsrxI8Wh6V97BMskQEegt92BrR0RLpMzz5/LUmsaNXfPQrGr37m/Lm/7q",
+	"EXqwlTT56XOyi2eSa2+W9qnYw4C4x9BvuUKvikzsXXHvB2Yq4JtiwwrhBSamNqV7pCnXZAhUNViKqshl",
+	"/c1G5YPNfDjGlK59AkXpZnbcM9TPz1D3j8gxpR5CFzDDIqGavvnUknwGIiVSmvDwZoL/Ysv1riH4cx7J",
+	"770EHPRg/ZxHnto0HRSe86h4Mb4nui2JzvkARSVizz0+pcUbf1ncrJZliHrF6k/g6J2bwsu7y8MyxDsk",
+	"CevuBHMJsk8o0yUyNYshQdie955f7pBfyuysLzw6MDaS4igyv7syNX6AcRGvfneVzF2RxGEyefzNlEwf",
+	"EPC0hL2R/1y2i17J2WmnprSHC23J9u+KTPwnTZ/948vbAdHatfHwcvdMVot5OCH14vDpD4UZlmQKnhDC",
+	"peKZ5XJTreYXQ8oiz9SvoQkHCEj5wlS6K5lcG2bUFv3n5Y8ZrMv7mORsCy62P7tCOHscvLxLbTnJWVEG",
+	"6GEalTsODVSk+IOlhol3lRcQfmtWs2y1wOJ8t9G/46IOeh/jnvPIFFC/xyrYFXmq3vIcoFP3VodIdH75",
+	"7m2IFk/131IJwGktw6QVVCzKRW21hEtzObFExP2UA59JJOc8p4k2lqbclkE76AFpv/sg1n7c58EJK0NS",
+	"mlDrU/BYgRrZM9p6qg4nXfDEnoUjxAfoHzwgG2kKKp6X/OMLE7mjxPWidi1Rp0Aq/93DOs/5PUh3BzHQ",
+	"SPkxnLcrR774xb8f7Mw3azL6qqKY3xl0tXabxQs76RFPdkWNpqgl+b/iLddPzMPHF2eGh8sQ7I+/mHTc",
+	"8e7t6/9FejkuKKxcWUwZIs7oshYkJtrIYqNM8CSPDS3UaiTLYdw+/mYrWa69ctya5Z1pY6euKsbbm1BA",
+	"WrwUOWC1sAqD63K3fvngqm4+bs9lo2goC6kK00XuhcBPLQSKoOOPkQMbPZyGMNjS17m3AmHvE+19ojWC",
+	"1BrZeyn6UEwpc6Dby9FabW8j5+pVvf/8pKldmlp+Vgrmgrry3PJoPG6ktx9kgiywgoM5WcCB460DngGT",
+	"czJVBzFPAz3dzSjCEkYmCi13m4R3M3LLGJFkZOT5dm+s7+6FVHAzuvpdjkzmpP0tp4f8EOTG/XT7iGI2",
+	"8/ziwer/AwAA///2lK66moQAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

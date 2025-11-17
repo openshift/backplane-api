@@ -200,6 +200,7 @@ paths:
           required: false
           schema:
             type: string
+            enum: ["hive", "management", "service"]
       responses:
         200:
           description: Returns a RemediationLoginResponse with the uri to use to proxy oc commands; the response also contains the id to use to delete the remediation instance
@@ -229,6 +230,7 @@ paths:
           required: false
           schema:
             type: string
+            enum: ["hive", "management", "service"]
       responses:
         200:
           description: Deletion successful
