@@ -1180,6 +1180,9 @@ components:
         - data
         - summary
       properties:
+        report_id:
+          type: string
+          description: Unique identifier for the report
         summary:
           type: string
           description: A summary name for the report
