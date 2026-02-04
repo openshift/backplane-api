@@ -757,6 +757,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /backplane/config:
+    get:
+      operationId: getConfig
+      summary: Get client configuration from backplane-api
+      responses:
+        200:
+          description: Client configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientConfig'
+        500:
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+
 security:
   - BearerAuth: []
 
@@ -1234,3 +1252,35 @@ components:
                 type: string
                 format: date-time
                 description: When the report was generated
+
+    ClientConfig:
+      description: Configuration values exposed to backplane-cli via the /config endpoint
+      type: object
+      properties:
+        jira_base_url:
+          type: string
+          description: URL to the Jira instance for creating and managing access requests
+        assume_initial_arn:
+          type: string
+          description: Initial AWS IAM role ARN used to bootstrap the isolated backplane credentials flow for accessing customer AWS accounts
+        jira_config_for_access_requests:
+          $ref: '#/components/schemas/JiraAccessRequestConfig'
+        prod_env_name:
+          type: string
+          description: String identifier for the production OCM environment, used to determine production vs non-production workflows and validation requirements
+
+    JiraAccessRequestConfig:
+      description: Jira project mappings and workflow configuration
+      type: object
+      properties:
+        project-key:
+          type: string
+          description: Jira project key (e.g., "OHSS")
+        issue-type:
+          type: string
+          description: Jira issue type for access requests (e.g., "Story", "Task")
+        transition-states:
+          type: object
+          additionalProperties:
+            type: string
+          description: Maps workflow state names to transition IDs
