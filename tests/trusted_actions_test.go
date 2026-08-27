@@ -81,6 +81,53 @@ func TestCreateTrustedAction(t *testing.T) {
 		result.InstanceId, result.ProxyUri, result.Expiry)
 }
 
+// TestDeleteTrustedAction creates a trusted action then immediately deletes it,
+// asserting 200 on delete. It also asserts that deleting an unknown instanceId returns 404.
+func TestDeleteTrustedAction(t *testing.T) {
+	client, clusterID := newTrustedActionClient(t)
+	ctx := context.Background()
+
+	req := Openapi.CreateTrustedActionRequest{
+		Name:               "integration-test-delete",
+		CustomerDataAccess: false,
+		Rbac: Openapi.TrustedActionRbacDecl{
+			ClusterRoleRules: []Openapi.PolicyRule{
+				{
+					Verbs:     &[]string{"get", "list"},
+					ApiGroups: &[]string{""},
+					Resources: &[]string{"pods"},
+				},
+			},
+			Roles: []Openapi.RoleRbacDecl{},
+		},
+	}
+
+	createResp, err := client.CreateTrustedActionWithResponse(ctx, clusterID, nil, req)
+	if err != nil {
+		t.Fatalf("Failed to create trusted action: %v", err)
+	}
+	if createResp.StatusCode() != 200 {
+		t.Fatalf("Expected status 200 on create, got %d. Body: %s", createResp.StatusCode(), string(createResp.Body))
+	}
+	instanceID := createResp.JSON200.InstanceId
+
+	deleteResp, err := client.DeleteTrustedActionWithResponse(ctx, clusterID, instanceID)
+	if err != nil {
+		t.Fatalf("Failed to delete trusted action: %v", err)
+	}
+	if deleteResp.StatusCode() != 200 {
+		t.Fatalf("Expected status 200 on delete, got %d. Body: %s", deleteResp.StatusCode(), string(deleteResp.Body))
+	}
+
+	notFoundResp, err := client.DeleteTrustedActionWithResponse(ctx, clusterID, "nonexistent--00000000-0000-0000-0000-000000000000")
+	if err != nil {
+		t.Fatalf("Failed to call delete on unknown instance: %v", err)
+	}
+	if notFoundResp.StatusCode() != 404 {
+		t.Fatalf("Expected status 404 for unknown instanceId, got %d. Body: %s", notFoundResp.StatusCode(), string(notFoundResp.Body))
+	}
+}
+
 // newTrustedActionClient builds an authenticated client for the trusted actions tests,
 // skipping the test when any of the staging environment variables are unset so the
 // suite does not fail in CI without credentials.

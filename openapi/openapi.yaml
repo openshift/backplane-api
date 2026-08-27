@@ -277,6 +277,34 @@ paths:
         500:
           <<: *base-errors
 
+  /backplane/trustedactions/{clusterId}/{trustedActionInstanceId}:
+    parameters:
+      - *cluster-id-param
+      - name: trustedActionInstanceId
+        in: path
+        description: The instance ID of a previously created trusted action
+        required: true
+        schema:
+          type: string
+    delete:
+      operationId: deleteTrustedAction
+      summary: Deletes an existing trusted action instance; removes the scoped service account (SA) and RBAC created for the trusted action
+      responses:
+        200:
+          description: Trusted action resources deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          <<: *base-errors
+        404:
+          <<: *base-errors
+        406:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+
   /backplane/testscript/{clusterId}:
     post:
       operationId: createTestScriptRun
