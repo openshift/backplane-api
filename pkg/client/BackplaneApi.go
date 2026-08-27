@@ -69,6 +69,13 @@ const (
 	CreateRemediationParamsManagingClusterService    CreateRemediationParamsManagingCluster = "service"
 )
 
+// Defines values for CreateTrustedActionParamsManagingCluster.
+const (
+	Hive       CreateTrustedActionParamsManagingCluster = "hive"
+	Management CreateTrustedActionParamsManagingCluster = "management"
+	Service    CreateTrustedActionParamsManagingCluster = "service"
+)
+
 // AssumableRole Roles and there corresponding ARN
 type AssumableRole struct {
 	// Arn ARN for the assumable role
@@ -147,6 +154,39 @@ type CreateTestJob struct {
 
 	// ScriptMetadata Script metadata
 	ScriptMetadata ScriptMetadata `json:"scriptMetadata"`
+}
+
+// CreateTrustedActionRequest Request body to create a trusted action instance
+type CreateTrustedActionRequest struct {
+	// CustomerDataAccess If true, triggers Access Transparency checks before proceeding
+	CustomerDataAccess bool `json:"customerDataAccess"`
+
+	// HiveClusterRbac Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+	HiveClusterRbac *map[string]interface{} `json:"hiveClusterRbac"`
+
+	// ManagementClusterRbac Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+	ManagementClusterRbac *map[string]interface{} `json:"managementClusterRbac"`
+
+	// Name Base name for the trusted action; becomes the prefix of the returned instanceId
+	Name string `json:"name"`
+
+	// Rbac RBAC rules to grant on the target cluster for a trusted action
+	Rbac TrustedActionRbacDecl `json:"rbac"`
+
+	// ServiceClusterRbac Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+	ServiceClusterRbac *map[string]interface{} `json:"serviceClusterRbac"`
+}
+
+// CreateTrustedActionResult Response returned when a trusted action instance is created
+type CreateTrustedActionResult struct {
+	// Expiry RFC3339 UTC timestamp when the scoped service account expires (720 minutes from creation)
+	Expiry time.Time `json:"expiry"`
+
+	// InstanceId Opaque identifier for the trusted action instance, format: {name}--{uuid4}
+	InstanceId string `json:"instanceId"`
+
+	// ProxyUri Path to use for proxying kube-api calls via this trusted action
+	ProxyUri string `json:"proxyUri"`
 }
 
 // EnvDecl defines model for EnvDecl.
@@ -421,6 +461,15 @@ type TestJobResult struct {
 // TestJobResultStatus Test run status
 type TestJobResultStatus string
 
+// TrustedActionRbacDecl RBAC rules to grant on the target cluster for a trusted action
+type TrustedActionRbacDecl struct {
+	// ClusterRoleRules Cluster-scoped RBAC rules
+	ClusterRoleRules []PolicyRule `json:"clusterRoleRules"`
+
+	// Roles Namespace-scoped role declarations
+	Roles []RoleRbacDecl `json:"roles"`
+}
+
 // GetReportsByClusterParams defines parameters for GetReportsByCluster.
 type GetReportsByClusterParams struct {
 	Last *int `form:"last,omitempty" json:"last,omitempty"`
@@ -473,6 +522,15 @@ type GetTestScriptRunLogsParams struct {
 	Follow *bool `form:"follow,omitempty" json:"follow,omitempty"`
 }
 
+// CreateTrustedActionParams defines parameters for CreateTrustedAction.
+type CreateTrustedActionParams struct {
+	// ManagingCluster If specified, which managing cluster to create kube-api access for ( service | management | hive )
+	ManagingCluster *CreateTrustedActionParamsManagingCluster `form:"managingCluster,omitempty" json:"managingCluster,omitempty"`
+}
+
+// CreateTrustedActionParamsManagingCluster defines parameters for CreateTrustedAction.
+type CreateTrustedActionParamsManagingCluster string
+
 // CreateReportJSONRequestBody defines body for CreateReport for application/json ContentType.
 type CreateReportJSONRequestBody = CreateReport
 
@@ -481,6 +539,9 @@ type CreateJobJSONRequestBody = CreateJob
 
 // CreateTestScriptRunJSONRequestBody defines body for CreateTestScriptRun for application/json ContentType.
 type CreateTestScriptRunJSONRequestBody = CreateTestJob
+
+// CreateTrustedActionJSONRequestBody defines body for CreateTrustedAction for application/json ContentType.
+type CreateTrustedActionJSONRequestBody = CreateTrustedActionRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -668,6 +729,11 @@ type ClientInterface interface {
 
 	// GetTestScriptRunLogs request
 	GetTestScriptRunLogs(ctx context.Context, clusterId string, testId string, params *GetTestScriptRunLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateTrustedActionWithBody request with any body
+	CreateTrustedActionWithBody(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateTrustedAction(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetCloudConsole(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1128,6 +1194,30 @@ func (c *Client) GetTestScriptRun(ctx context.Context, clusterId string, testId 
 
 func (c *Client) GetTestScriptRunLogs(ctx context.Context, clusterId string, testId string, params *GetTestScriptRunLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetTestScriptRunLogsRequest(c.Server, clusterId, testId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateTrustedActionWithBody(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTrustedActionRequestWithBody(c.Server, clusterId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateTrustedAction(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTrustedActionRequest(c.Server, clusterId, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2680,6 +2770,75 @@ func NewGetTestScriptRunLogsRequest(server string, clusterId string, testId stri
 	return req, nil
 }
 
+// NewCreateTrustedActionRequest calls the generic CreateTrustedAction builder with application/json body
+func NewCreateTrustedActionRequest(server string, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateTrustedActionRequestWithBody(server, clusterId, params, "application/json", bodyReader)
+}
+
+// NewCreateTrustedActionRequestWithBody generates requests for CreateTrustedAction with any type of body
+func NewCreateTrustedActionRequestWithBody(server string, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedactions/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.ManagingCluster != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "managingCluster", runtime.ParamLocationQuery, *params.ManagingCluster); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -2836,6 +2995,11 @@ type ClientWithResponsesInterface interface {
 
 	// GetTestScriptRunLogsWithResponse request
 	GetTestScriptRunLogsWithResponse(ctx context.Context, clusterId string, testId string, params *GetTestScriptRunLogsParams, reqEditors ...RequestEditorFn) (*GetTestScriptRunLogsResponse, error)
+
+	// CreateTrustedActionWithBodyWithResponse request with any body
+	CreateTrustedActionWithBodyWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error)
+
+	CreateTrustedActionWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error)
 }
 
 type GetCloudConsoleResponse struct {
@@ -3612,6 +3776,28 @@ func (r GetTestScriptRunLogsResponse) StatusCode() int {
 	return 0
 }
 
+type CreateTrustedActionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateTrustedActionResult
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateTrustedActionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateTrustedActionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetCloudConsoleWithResponse request returning *GetCloudConsoleResponse
 func (c *ClientWithResponses) GetCloudConsoleWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*GetCloudConsoleResponse, error) {
 	rsp, err := c.GetCloudConsole(ctx, clusterId, reqEditors...)
@@ -3958,6 +4144,23 @@ func (c *ClientWithResponses) GetTestScriptRunLogsWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseGetTestScriptRunLogsResponse(rsp)
+}
+
+// CreateTrustedActionWithBodyWithResponse request with arbitrary body returning *CreateTrustedActionResponse
+func (c *ClientWithResponses) CreateTrustedActionWithBodyWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error) {
+	rsp, err := c.CreateTrustedActionWithBody(ctx, clusterId, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTrustedActionResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateTrustedActionWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error) {
+	rsp, err := c.CreateTrustedAction(ctx, clusterId, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTrustedActionResponse(rsp)
 }
 
 // ParseGetCloudConsoleResponse parses an HTTP response from a GetCloudConsoleWithResponse call
@@ -4722,88 +4925,123 @@ func ParseGetTestScriptRunLogsResponse(rsp *http.Response) (*GetTestScriptRunLog
 	return response, nil
 }
 
+// ParseCreateTrustedActionResponse parses an HTTP response from a CreateTrustedActionWithResponse call
+func ParseCreateTrustedActionResponse(rsp *http.Response) (*CreateTrustedActionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateTrustedActionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateTrustedActionResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"H4sIAAAAAAAC/+w9a3PbOJJ/BcW7D8mWZDmvuT3PJ8fe7DiTh0t2bvdqknJBZEtCDAEcAJSty+q/X6EB",
+	"vkE9HCvr2P4mkQAaaHQ3+oXmtyiWs1QKEEZHB98iHU9hRvHnodbZjI44DCUH+yABHSuWGiZFdBDZp5pQ",
+	"kRAzBQUklkqBTqVImJiQw+GHqBelSqagDAMckCrRHuZw+IGMpbKDEJpDJMqC7EVmkUJ0EGmjmJhEy14k",
+	"6Cwwld+yGRVEAU1s53a/ZS9S8GfGFCTRwR9ukB5O50vRVo6+QmwsDFw3LvoM/sxAxDDEdekQEvwbXAJO",
+	"382dTKlIOKg2Dmwb7J0PHsasRaAmRuaDMkGkSnBAZmCGY/2ngnF0EP3HoNzCgd+/QX3zlsUyqVJ00cJI",
+	"YFYhzBxxBsIcSTFmk/a03fNMUfufzCnPQBO4TqWGxK5kROPLlFMB/ZgzMmcU93wQYzcCIkklE6aFsa9M",
+	"0YsR1XCRKd6G+mn4zg5uh3rLFCVMaENF7HYkVkCNJUdLpjMq6AT/xDFoTSwCQBsdojME6mZ2MZbqwnW5",
+	"KLqswb6dySF2GboeHmdLXFxyAWJ+ESblM5wCYQkIw8YMVMEctmMWI24/Hr0nIOZMSTEDYXok8yhOwICa",
+	"MVFrPddESNGvPLmS6nLM5ZVj3znlLHGb5mlihtIgxEYBkpBZcqQA50u53pBVYtutk0linmkD6uQ4QGTF",
+	"q8CuxVJoyeEdE5ftnvZpTim+YY9IfEt5cLRyVaF52AVUmqweS8EE+7WRYp+v6tvg1Liyfm2oyfSRTDq4",
+	"1RI/vJUjC7aBYCqkYDHlH4JEaJ8SOUZUuecWcSoToaWlVNGZpTsn35KEuaWc1iC2ujVOATKjqQVZjlYQ",
+	"vmvXI7NMGzICQsmYU0PcQj1nm3gK+rNAPilHSCDmVEFCpMCRZmBoQg39XFlIjq9lJwaHkEplQnuHrE1G",
+	"Mlk0pA0RcEWU69ckbjuB0GC2sSVMgxxtBd4vLwmIWCaQhPCus9mMqkXgRCX+FbEipkBjMZ3VBIbTK0fv",
+	"Jqxz0MYTVx3+6wA+jEXUVzlqYcOu82RGJ/BxDkqxBILniqFMgCLMNiSGTiw5St+BJDCmGTdOvkPSd301",
+	"otB3STKUqvksLCnvhXCaqMUwC7DpG+5gMpGwmBogV1OwWo99NgEByj6zq5yl3P6UisA1xJmBCgWXAEdS",
+	"cqDiHnFPL3Jw7N4HKKJGzLlIQb7pliuu1XsPdN2Je1Zv3aTqyuxaI68gcWWFbXKIp6Zn9zVywEhH9kgO",
+	"rjuh7tTNNZP2cZdpI2egjqnxWkMbyMnYDgc9YhSbTOz2uJbkXFGhU6pAxAsSTyG+1GQEY6lQB4gBrDoe",
+	"JL0pm4M/TocjGgdPbFBzSJCWxlJdUZX0Le6pYSPGmVn8SoQ0ZAGGsFnKUW+w67VE5clNZJwP6EiDMOQJ",
+	"RUXEPnLqIVFgMiU0ebm//zTqRfYNavAHuNb2tjgWt2B+somHlT3LF3UhXSeZX8kIYjkD7RVAGLPr/Fx2",
+	"M4CkIKuT4CmhPIJW8U6dzEc0PoaYIwuCmrP45yKSsK0XYDGPm425X2fcrNBqi/24moLoZn7CtBcQSUsO",
+	"wHXKQgf68M3Rixcv/pt8Oj8ihs1AGzpLHRwn4WVqparbLGvdyEwYgqOBJk/+6/k+mTGRGdBkrOTMn8tS",
+	"WGyOpZpREx3Ycx/6dvQQFVVorDW7jyn9M4OQxdKBgh5xQA/IN7s7y37/W5ax5OUyqF0qeb34pFgb7ik1",
+	"UytuM29SYEt7yl9mI+jTlJGYcq69ocl0YzprFaECcm35vXyXQnTzNzFH1mnp27WZt/W1yv+cvUHMyZyq",
+	"EEouIUAjv8Oi0jXUrTAxWn3/kSszFksesKXTtlFSnB7L8OqHQDnTkLQxcMNJowRodzyf+tNNW8PXiYl1",
+	"iAtOWSmp2pOdgdZ0EoCL7cl7/zqktJQmWdtLdX5+SlwDYhWhsj8TBiagwnPs8iW0xkf3R6okKnYzmqZM",
+	"TJyFn9v7JK66aFryh2mdwYWbQHBwbEBsA+fvqvtRyBPYm+z1yOfozEi1+BzZn+dUX36Onnawtp3qRZA0",
+	"aou5hEU5+Mffzs46RjRWF0IF+sLiGb5Hp35PU10iDofDoxqdciUgcnKsNzMmg4b4VzkKydRDQTLBnFhF",
+	"u8MJ14VjUW/BBP1WcnSGFLbWQ1U0tGpVF70fkinwdJxx4pvkDpRMQ1A22efvj1+1R3p//CrnUNuGXE1z",
+	"RRn9x9423IBl31ZX2Dg/RQCVfxPJ4A0TTE/x7Ky7NboOwA4do1wniLkOoQvdqxZGxT3XbZVt6sytStaW",
+	"K9cplzqlcYcnB1813DkjsCeloissr80sLi/0Qv6RM/t4C6R3CNP2wF6GNgcFkc3swX0Kwts8w0wI9+ss",
+	"i60phErXG8o4/vgkLoW8sij4nXH76MtGFPiOjoDf6JwfKQbj0GnP7ZA3Oes7Ozr3e7vv/zi3fE6Hjf5l",
+	"dKC9aqaNc1IFCZ8zbeyknJfJAaDEeyu7HLwXLAmf7f49sQejEpSTT5/CHl9VzqjgpAYoJ2QuqAkqPqLi",
+	"GyNXVBfunGRjMnWdg2v5lAvxlm7c5Y27Rb/euqBPZRNKRIbU2ndywkS3Yx9f54qNypv1NtWpZt3aFKrg",
+	"F1lI+/89G8Hh6YnT+smn4cm22tgaRcwtO0BP3D9t4aAQSKlMNjvK3oOh82dnHVLukFz+VRPXxmO3R66m",
+	"LJ6SmAprNruJcb6wJ4xVhEcLIuOBtX9iwzEexHTK6YJQUmK5wR7dqqqzaLswZPUlQ1koNkLRVTh/tueW",
+	"duzaeZdjj2QCw1VMlBFBEmdKgTB8EXItbq6ehNmT6rA4dm+Ia2qxOWeJi6NhjAiDnducS7VV5wzhuwXZ",
+	"81RyFi+GmQuvNwLFKfu7kllal21tlbfK4b3oui9pyvp2zyYg+nBtFO0b6kh2QWfcts1H7smZHTg1TjYI",
+	"9HLITMXwafju9uE2xm9AV/4Vaiy3Drs2egfk3UFtQpyDGt0+NBy1BikkdIavD48CLqbXh0fe4R+2Df1h",
+	"MZQcLL3WZ79KTazQ+M2W1YTc3D25zWxwlIqH8yabKpuTWG7YcUTjxuSHMIOEIcZbhyzl/OM4Ovhj9YLq",
+	"3Za9phhRJYSTFU48K/BYUvqWi06l47JfZBlwiTEw2/LskHzO9vef/0KQgnKLbrSoyHYfPjJUTcBUVMLV",
+	"7rfwxNvqyRdEYzhCe0g0ExNe6HdrlNKda4q3Ffq9qxpnQ78s8dnLw8rlzFeHmGt82jobawZvGzu3JZ+C",
+	"8vOsMI4b5zXn8gqS8sxuEpBV3Cb4llAFxLf3AVDn2Gl7BVafC8teRDMzdS7Mxtbh87qN3CMTZqbZCD0w",
+	"PjDSznpZnRryJrP65p8Z5Za6EkcYDSjMsYrjCTQKJYeTZODe2x57n8V7H/txfq4eeT8kTPRTTmNwYUyL",
+	"GRBjqWJA7HwO+io2iZ3m/m2pMBJVcYNMqc69mEaSfCziibUdMr2pfe/BoS92Sg1hhiQSgplnHZ4lEXYt",
+	"zalidMThOzxLwaNw2YvQNbBmKq5NN+zgsGKSBbX58xJRRaPSq5MuzBT1khHV04Cnphel1Ew7wkQY9spF",
+	"F1FSmlzLb6ZmVIYDNaM8mEp2mr+qj0LGjONxN2HmprFYVM+sTJ5KZY5Xkxu2seRaITjcCkcRlto405tm",
+	"8p218i0a7jy3xjwLpJ3Z2hSANxFiG/L3Ws7sZKvv5Qq7xUEAJbtsBKJ0Iq7hkc3pP88xuHW6W33MI0Z6",
+	"eaC9ug+B0Yq99rPyG1NZcq9BSAVmg7TwpSDczVFfOq6bePcpbV2xfkxsQx9nNem7llW2yu21sR/BTgOV",
+	"At+gFIJrHNq55ztEHXaWwVBTJdKEwsMC9/IsGGRqbL8fN6TEhfNKwrYnKm2YTqeoMGGbIcd3M46/3lIN",
+	"5hD3feJECX/TU3OVzlixSDtCMTlcvCdQsbk3Br/SiO3w8pboyCf4JRS11BBnipnFmQXlVvEaqAJl9UnM",
+	"18R/b3Jz5+uViZqR07f/OCdGXoIgltcx384OZuU1di5JampM6uxnJsYyQJunJ+SNVKUtabsyYyVw9Lq4",
+	"TXB4ehKhT0W7Xs/29vf2XcYDCJqy6CB6sbe/9yJyKgIualAMOcBU9IHPCB98yxOsk6VtNwGUA5a+nCma",
+	"RAfR38G4tHfXJ6pncf6xTUCD2QaouOTyu8jwdl75fCNdHNJRQEgmf0E/FoolXODz/X3n3kWj0jkUU85i",
+	"XMXgq/eIluOtorfOHH/cukY20KXF/MsW9L8M/rI5QJeWERj9NU1InoeJYF7sBMwbqUYsSUA4IC93AsRL",
+	"ITRJxjITiQP2y06AfZAGDZ0UdUML6dWOtugkp/AzUHNQJG9YcTNYBvI3QDzbkUzxhnfG9mhzaUmEA3cx",
+	"qm+FWV/7W0ubsm/7ite9Z+IVt9oe2fiRjTdkYwtwN5v1m7sLRhKm7dqSgMgIcfy2UmOr871yAezxjH8U",
+	"Do/C4Q4Lh7h5IXOdZMDHVXkwcAYIBwNtmXCMzwujw2/sUY2PK6z57J//bJsz9uGyFz0PvXvu3r0IvXvh",
+	"3r0MvXvp3r0KvbMP64g6xWwZnyAykDGhKSvyd3tE+lT+SmZG3xpQy16noHy4GJkCTdoo+Q1o8nBx4m4M",
+	"6DZaProXDxczd0J7SKmJp+3NObWPH/DWSB2QbadSP2DhlmYhlGQPGCNG+XyDOk7O7eOHipXVKtUFS5aD",
+	"SoJ2lwrhs8pfL47KxJy6tEQZ+GcGalEKQU61iaryrqEMZ7MRqGpGupE+o7VHtFQ+S6m8Tmm7u/AJeZJX",
+	"FHi2/zSUG7xLO6yaZh9QhDHso/U443YxisGc8soid2mXFUr+riyyCoCXuwXwarcoatkmqy9HLMP0Hjzz",
+	"82T9rkP/xlcpUD0IHoS1IigONuii0MPtOB+qIJb1CJZd4bLFcM9uDXYVajAvTxcsxxfF1e17wWc/kg2O",
+	"8qIYZWWc7Qz06mky+FbkES7XnyyvF+2D+DZFdjcFrZbWj8L6TgprSnQKMRuzOKfT0YKcHN8RMd0LdfYZ",
+	"HH66XWZjNfd2C7OxwZbF5fNO17lrsVNfdaUMYdDrat83LrvfiZBne14uNXGlXs3lhIlm4OJu+BOCCgNe",
+	"SSh1+d2pyvWrD+198RcTCyHcK0rJuFuDmWJ5rrK/61bmLj2e7tvITYdpI7uP8/w6Ry1Eb8/x4pbHVv73",
+	"/OIMFKZ25SrNozP+YaNnA8/8w0bQxm76h42mf/8Z29L2qjfz7Mi9suSvKxLnq4DlRcAC9bG6lMP6vt52",
+	"VOGBU9L6EMMDR9C6eMPDRs9GwYeHjKKwsmltiobdtFq/rCNspfzf4MZ0qmDOZKb5wj8zrHU7OpfGjehG",
+	"+Pbzdx0dJ+PcsQFJXkikKImfn2Rl+dqiiqK/H2mPkCdFkcl/kbIUK/kXmbI5kKcda8mBlCZhOev8Yosd",
+	"IKrWd42K6qOhqkwdEZj6gnFL7YaUFuCjZbetZef4QhMqCFwzjeW8Q8T+K0l8y4oWUtQifXJ2+BTvI9aq",
+	"BJT3ydvj3Z2ciZVBkY3FhZ1uflea1lbsOdFfh64KivWy4YO7dPcoFXaeH9tZqSMYOHJeJkq6epErZqau",
+	"GKJiuZJupPdLyZjEcjajItG/egbx3SjXEgtFUCYcp7n6kL67Y8GVPPUo/baRficlN+oidhU46X0NFMck",
+	"m4jA8P3GzBfxMlgjoNi1unLj5rxpIru/HLtlckVZqSHaSpr89Gnw+V3ilcG8x+z3zYD4igEfpCFv8uT3",
+	"XXHvJ4HfDcPvcRhC55RhAVd/k1mvSMooCxXlHw4pitTWyoOs58MB5XzlrTPO17PjI0P9/Ax194icch4g",
+	"dAUTqhJu6VuOHcmnoGZMa3QPryf4r66m9QqCfytH+nuDgBtdin8rR4G78C0UvpWjvKzCI9FtSXTeBsjL",
+	"dQdSJzjPC2HoPLJa1OrqFKs/gaH3FquT7y71DYl3k7y32xPMBcguocwXBAt7Q0Ko2+9HfrlFfikS4r7K",
+	"0R7qSEaSEX6acIx2AJqIl3/15f59JdHNZPLgG35XYAOHpyPstfznE4zsTE6OW4XXA1zovmvwXZ6Jf6fq",
+	"83jf9WZA7Olau+u6eyar+Dy8kHq1//yHwuwVZAoBF8KZkanjcizp9ARJWWWpedpDd4CCmZxjOciCya1i",
+	"xt2XMWTxxY9VeR/DTGzBxe7LhO7bJQ+Al3d5Wg4zkdfKup9K5Y5dAyUp/mCpgf6uIgAR1mYty5YTzPd3",
+	"m/N3kH8soItx38oRfmXgDh/Bvq5WeX1qjxz761FMk7dnHz/0yPy5/a2NAjqrZJg0nIp5ha6tpnCGwYkF",
+	"Yf57J3KiiZ7KjCdWWRpLVytwrwOkex+CWPmS2b0TVkhSllCrQ8jYgOm7Pdp6qBYnncrE7YUnxHtoH9wj",
+	"HWkMJp4W/BNyE/mtpNXKjw1RZ0CbcOxhleV8DtrHIDZUUn4M5+3KkM8/iv2Djfl64dLQlQj/yU/k13qF",
+	"z1Z6xLNdUSNWfmX/l1+f+4l5+PD0BHm4cMH++MCk546PH979L7HT8U5h42vH6h6Rgi8qTmIm8MO6qZJJ",
+	"5j7IWikkrjfj9sE3V+51Zchxa5b3qo0buvysgouEArHiJc8Bq7hVBFwVqw3LB1+a9mFbLmtFQ1FtWGET",
+	"/SgEfmohkDsdf4wcWGvh1ITBlrbOnRUIjzbRo020QpA6JftRit4XVQo39HvlqCta72rW65/oNq+3a6ql",
+	"/NeJ8DudUxpMJu25VNOunNKdWYu1DyTk/o0fazoGZ9KlK+aZrcZ9f9/foa5cMiv2sryzgVmqeaJkma5q",
+	"Wyc+Q99FQvDr/dcpU4vSvYkfSmikUt6Xuhm/3LfqLrr1cY5Whmz3rm6eIFvkSbeIzU03/4YFSqbq1yv+",
+	"+GLZWWORBie3MsX9Zyj0wWBQu1O0lyo2pwb2rGTY8xPYkykIPWVjsxfLWWSHu+6PqIY+hv70bnf0uu+n",
+	"0WdJHyXwdrVEbu9aanTdv/yr7uM2uK9M3ufbd9d9N3KfUzEJfItp+f8BAAD//3AsEPtFlwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

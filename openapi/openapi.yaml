@@ -241,6 +241,42 @@ paths:
         500:
           <<: *base-errors
 
+  /backplane/trustedactions/{clusterId}:
+    parameters:
+      - *cluster-id-param
+    post:
+      operationId: createTrustedAction
+      summary: Creates a trusted action instance & the scoped service account (SA) and RBAC on the target cluster used to proxy kube-api requests
+      parameters:
+        - name: managingCluster
+          in: query
+          description: If specified, which managing cluster to create kube-api access for ( service | management | hive )
+          required: false
+          schema:
+            type: string
+            enum: ["management", "service", "hive"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTrustedActionRequest'
+      responses:
+        200:
+          description: Returns the proxy uri to use for kube-api requests, the instance id to use for deletion, and the expiry of the scoped service account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTrustedActionResult'
+        400:
+          <<: *base-errors
+        403:
+          <<: *base-errors
+        406:
+          <<: *base-errors
+        500:
+          <<: *base-errors
+
   /backplane/testscript/{clusterId}:
     post:
       operationId: createTestScriptRun
@@ -1144,6 +1180,72 @@ components:
             yaml: roles,omitempty
           items:
             $ref: '#/components/schemas/RoleRbacDecl'
+
+    TrustedActionRbacDecl:
+      description: RBAC rules to grant on the target cluster for a trusted action
+      type: object
+      required:
+        - clusterRoleRules
+        - roles
+      properties:
+        clusterRoleRules:
+          type: array
+          description: Cluster-scoped RBAC rules
+          items:
+            $ref: '#/components/schemas/PolicyRule'
+        roles:
+          type: array
+          description: Namespace-scoped role declarations
+          items:
+            $ref: '#/components/schemas/RoleRbacDecl'
+
+    CreateTrustedActionRequest:
+      description: Request body to create a trusted action instance
+      type: object
+      required:
+        - name
+        - customerDataAccess
+        - rbac
+      properties:
+        name:
+          type: string
+          description: Base name for the trusted action; becomes the prefix of the returned instanceId
+        customerDataAccess:
+          type: boolean
+          description: If true, triggers Access Transparency checks before proceeding
+        rbac:
+          $ref: '#/components/schemas/TrustedActionRbacDecl'
+        managementClusterRbac:
+          type: object
+          nullable: true
+          description: Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+        serviceClusterRbac:
+          type: object
+          nullable: true
+          description: Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+        hiveClusterRbac:
+          type: object
+          nullable: true
+          description: Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+
+    CreateTrustedActionResult:
+      description: Response returned when a trusted action instance is created
+      type: object
+      required:
+        - proxyUri
+        - instanceId
+        - expiry
+      properties:
+        proxyUri:
+          type: string
+          description: Path to use for proxying kube-api calls via this trusted action
+        instanceId:
+          type: string
+          description: 'Opaque identifier for the trusted action instance, format: {name}--{uuid4}'
+        expiry:
+          type: string
+          format: date-time
+          description: RFC3339 UTC timestamp when the scoped service account expires (720 minutes from creation)
 
     ScriptMetadata:
       description: Script metadata
