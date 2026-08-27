@@ -35,6 +35,45 @@ x-k8s-proxy: &k8s-proxy
     5XX:
       description: 5XX
 
+x-k8s-proxy-with-body: &k8s-proxy-with-body
+  summary: Proxy kubectl/oc api requests, opaque in backplane-api
+  requestBody:
+    required: false
+    content:
+      application/json:
+        schema:
+          type: object
+          description: Arbitrary JSON request body forwarded to Kubernetes API
+      application/json-patch+json:
+        schema:
+          type: array
+          items:
+            type: object
+          description: JSON Patch operations for Kubernetes resources
+      application/merge-patch+json:
+        schema:
+          type: object
+          description: Merge patch for Kubernetes resources
+      application/strategic-merge-patch+json:
+        schema:
+          type: object
+          description: Strategic merge patch for Kubernetes resources
+      application/apply-patch+yaml:
+        schema:
+          type: object
+          description: Server-side apply patch for Kubernetes resources
+  responses:
+    1XX:
+      description: 1XX
+    2XX:
+      description: 2XX
+    3XX:
+      description: 3XX
+    4XX:
+      description: 4XX
+    5XX:
+      description: 5XX
+
 x-script-lang: &script-lang
   - python
   - bash
@@ -315,10 +354,10 @@ paths:
         schema:
           type: string
     get: *k8s-proxy
-    post: *k8s-proxy
-    patch: *k8s-proxy
+    post: *k8s-proxy-with-body
+    patch: *k8s-proxy-with-body
     delete: *k8s-proxy
-    put: *k8s-proxy
+    put: *k8s-proxy-with-body
     options: *k8s-proxy
     head: *k8s-proxy
     trace: *k8s-proxy

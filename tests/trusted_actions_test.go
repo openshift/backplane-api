@@ -1,8 +1,10 @@
 package tests
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"testing"
@@ -169,6 +171,132 @@ func TestProxyTrustedAction(t *testing.T) {
 	}
 
 	t.Logf("Proxied K8s call succeeded: instanceId=%s status=%d", instanceID, proxyResp.StatusCode)
+}
+
+// TestProxyTrustedActionMutations creates a trusted action with permissions to create
+// and update ConfigMaps, then tests POST, PATCH, and PUT operations through the proxy.
+func TestProxyTrustedActionMutations(t *testing.T) {
+	client, clusterID := newTrustedActionClient(t)
+	ctx := context.Background()
+
+	// Create trusted action with permissions to manage ConfigMaps
+	req := Openapi.CreateTrustedActionRequest{
+		Name:               "integration-test-mutations",
+		CustomerDataAccess: false,
+		Rbac: Openapi.TrustedActionRbacDecl{
+			ClusterRoleRules: []Openapi.PolicyRule{
+				{
+					Verbs:     &[]string{"get", "list", "create", "update", "patch", "delete"},
+					ApiGroups: &[]string{""},
+					Resources: &[]string{"configmaps"},
+				},
+			},
+			Roles: []Openapi.RoleRbacDecl{},
+		},
+	}
+
+	createResp, err := client.CreateTrustedActionWithResponse(ctx, clusterID, nil, req)
+	if err != nil {
+		t.Fatalf("Failed to create trusted action: %v", err)
+	}
+	if createResp.StatusCode() != 200 {
+		t.Fatalf("Expected status 200 on create, got %d. Body: %s", createResp.StatusCode(), string(createResp.Body))
+	}
+	instanceID := createResp.JSON200.InstanceId
+
+	// Test POST: Create a ConfigMap
+	configMapJSON := `{
+		"apiVersion": "v1",
+		"kind": "ConfigMap",
+		"metadata": {
+			"name": "test-proxy-mutation",
+			"namespace": "default"
+		},
+		"data": {
+			"key1": "value1"
+		}
+	}`
+
+	postResp, err := client.PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(
+		ctx, clusterID, instanceID, "application/json",
+		bytes.NewBufferString(configMapJSON))
+	if err != nil {
+		t.Fatalf("Failed to POST ConfigMap through proxy: %v", err)
+	}
+	defer postResp.Body.Close()
+
+	if postResp.StatusCode < 200 || postResp.StatusCode >= 300 {
+		body, _ := io.ReadAll(postResp.Body)
+		t.Errorf("Expected 2xx response for POST, got %d. Body: %s", postResp.StatusCode, string(body))
+	} else {
+		t.Logf("POST through proxy succeeded: status=%d", postResp.StatusCode)
+	}
+
+	// Test PATCH: Update the ConfigMap
+	patchJSON := `{
+		"data": {
+			"key1": "updated-value",
+			"key2": "new-value"
+		}
+	}`
+
+	patchResp, err := client.PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(
+		ctx, clusterID, instanceID, "application/merge-patch+json",
+		bytes.NewBufferString(patchJSON))
+	if err != nil {
+		t.Fatalf("Failed to PATCH ConfigMap through proxy: %v", err)
+	}
+	defer patchResp.Body.Close()
+
+	if patchResp.StatusCode < 200 || patchResp.StatusCode >= 300 {
+		body, _ := io.ReadAll(patchResp.Body)
+		t.Errorf("Expected 2xx response for PATCH, got %d. Body: %s", patchResp.StatusCode, string(body))
+	} else {
+		t.Logf("PATCH through proxy succeeded: status=%d", patchResp.StatusCode)
+	}
+
+	// Test PUT: Replace the ConfigMap
+	putConfigMapJSON := `{
+		"apiVersion": "v1",
+		"kind": "ConfigMap",
+		"metadata": {
+			"name": "test-proxy-mutation",
+			"namespace": "default"
+		},
+		"data": {
+			"key3": "replaced-value"
+		}
+	}`
+
+	putResp, err := client.PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(
+		ctx, clusterID, instanceID, "application/json",
+		bytes.NewBufferString(putConfigMapJSON))
+	if err != nil {
+		t.Fatalf("Failed to PUT ConfigMap through proxy: %v", err)
+	}
+	defer putResp.Body.Close()
+
+	if putResp.StatusCode < 200 || putResp.StatusCode >= 300 {
+		body, _ := io.ReadAll(putResp.Body)
+		t.Errorf("Expected 2xx response for PUT, got %d. Body: %s", putResp.StatusCode, string(body))
+	} else {
+		t.Logf("PUT through proxy succeeded: status=%d", putResp.StatusCode)
+	}
+
+	// Clean up: Delete the ConfigMap
+	deleteResp, err := client.DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId(
+		ctx, clusterID, instanceID)
+	if err != nil {
+		t.Fatalf("Failed to DELETE ConfigMap through proxy: %v", err)
+	}
+	defer deleteResp.Body.Close()
+
+	if deleteResp.StatusCode < 200 || deleteResp.StatusCode >= 300 {
+		body, _ := io.ReadAll(deleteResp.Body)
+		t.Logf("Warning: ConfigMap cleanup failed with status %d. Body: %s", deleteResp.StatusCode, string(body))
+	}
+
+	t.Logf("Mutation tests completed: instanceId=%s", instanceID)
 }
 
 // newTrustedActionClient builds an authenticated client for the trusted actions tests,
