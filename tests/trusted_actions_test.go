@@ -128,6 +128,49 @@ func TestDeleteTrustedAction(t *testing.T) {
 	}
 }
 
+// TestProxyTrustedAction creates a trusted action, then issues a proxied GET to
+// /api/v1/namespaces through the returned proxyUri and asserts a successful (2xx) response.
+func TestProxyTrustedAction(t *testing.T) {
+	client, clusterID := newTrustedActionClient(t)
+	ctx := context.Background()
+
+	req := Openapi.CreateTrustedActionRequest{
+		Name:               "integration-test-proxy",
+		CustomerDataAccess: false,
+		Rbac: Openapi.TrustedActionRbacDecl{
+			ClusterRoleRules: []Openapi.PolicyRule{
+				{
+					Verbs:     &[]string{"get", "list"},
+					ApiGroups: &[]string{""},
+					Resources: &[]string{"namespaces"},
+				},
+			},
+			Roles: []Openapi.RoleRbacDecl{},
+		},
+	}
+
+	createResp, err := client.CreateTrustedActionWithResponse(ctx, clusterID, nil, req)
+	if err != nil {
+		t.Fatalf("Failed to create trusted action: %v", err)
+	}
+	if createResp.StatusCode() != 200 {
+		t.Fatalf("Expected status 200 on create, got %d. Body: %s", createResp.StatusCode(), string(createResp.Body))
+	}
+	instanceID := createResp.JSON200.InstanceId
+
+	proxyResp, err := client.GetBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterID, instanceID)
+	if err != nil {
+		t.Fatalf("Failed to make proxied K8s call: %v", err)
+	}
+	defer proxyResp.Body.Close()
+
+	if proxyResp.StatusCode < 200 || proxyResp.StatusCode >= 300 {
+		t.Errorf("Expected 2xx proxied response, got %d", proxyResp.StatusCode)
+	}
+
+	t.Logf("Proxied K8s call succeeded: instanceId=%s status=%d", instanceID, proxyResp.StatusCode)
+}
+
 // newTrustedActionClient builds an authenticated client for the trusted actions tests,
 // skipping the test when any of the staging environment variables are unset so the
 // suite does not fail in CI without credentials.

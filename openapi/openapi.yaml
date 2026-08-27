@@ -305,6 +305,24 @@ paths:
         500:
           <<: *base-errors
 
+  /backplane/trustedaction/{clusterId}/{trustedActionInstanceId}/:
+    parameters:
+      - *cluster-id-param
+      - name: trustedActionInstanceId
+        in: path
+        description: The instance ID of a previously created trusted action
+        required: true
+        schema:
+          type: string
+    get: *k8s-proxy
+    post: *k8s-proxy
+    patch: *k8s-proxy
+    delete: *k8s-proxy
+    put: *k8s-proxy
+    options: *k8s-proxy
+    head: *k8s-proxy
+    trace: *k8s-proxy
+
   /backplane/testscript/{clusterId}:
     post:
       operationId: createTestScriptRun
