@@ -5,9 +5,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"regexp"
 	"testing"
+	"time"
 
 	Openapi "github.com/openshift/backplane-api/pkg/client"
 )
@@ -33,7 +35,8 @@ var instanceIDPattern = regexp.MustCompile(`^.+--[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[
 // staging credentials are not present, keeping it inert in CI without creds.
 func TestCreateTrustedAction(t *testing.T) {
 	client, clusterID := newTrustedActionClient(t)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	req := Openapi.CreateTrustedActionRequest{
 		Name:               "integration-test",
@@ -79,6 +82,13 @@ func TestCreateTrustedAction(t *testing.T) {
 		t.Error("Expected a non-zero expiry in response")
 	}
 
+	t.Cleanup(func() {
+		delResp, _ := client.DeleteTrustedActionWithResponse(ctx, clusterID, result.InstanceId)
+		if delResp != nil && delResp.StatusCode() != 200 && delResp.StatusCode() != 404 {
+			t.Logf("Warning: cleanup failed to delete instanceId=%s, status=%d", result.InstanceId, delResp.StatusCode())
+		}
+	})
+
 	t.Logf("Created trusted action: instanceId=%s proxyUri=%s expiry=%s",
 		result.InstanceId, result.ProxyUri, result.Expiry)
 }
@@ -87,7 +97,8 @@ func TestCreateTrustedAction(t *testing.T) {
 // asserting 200 on delete. It also asserts that deleting an unknown instanceId returns 404.
 func TestDeleteTrustedAction(t *testing.T) {
 	client, clusterID := newTrustedActionClient(t)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	req := Openapi.CreateTrustedActionRequest{
 		Name:               "integration-test-delete",
@@ -113,6 +124,13 @@ func TestDeleteTrustedAction(t *testing.T) {
 	}
 	instanceID := createResp.JSON200.InstanceId
 
+	t.Cleanup(func() {
+		delResp, _ := client.DeleteTrustedActionWithResponse(ctx, clusterID, instanceID)
+		if delResp != nil && delResp.StatusCode() != 200 && delResp.StatusCode() != 404 {
+			t.Logf("Warning: cleanup failed to delete instanceId=%s, status=%d", instanceID, delResp.StatusCode())
+		}
+	})
+
 	deleteResp, err := client.DeleteTrustedActionWithResponse(ctx, clusterID, instanceID)
 	if err != nil {
 		t.Fatalf("Failed to delete trusted action: %v", err)
@@ -134,7 +152,8 @@ func TestDeleteTrustedAction(t *testing.T) {
 // /api/v1/namespaces through the returned proxyUri and asserts a successful (2xx) response.
 func TestProxyTrustedAction(t *testing.T) {
 	client, clusterID := newTrustedActionClient(t)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	req := Openapi.CreateTrustedActionRequest{
 		Name:               "integration-test-proxy",
@@ -160,7 +179,17 @@ func TestProxyTrustedAction(t *testing.T) {
 	}
 	instanceID := createResp.JSON200.InstanceId
 
-	proxyResp, err := client.GetBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterID, instanceID)
+	t.Cleanup(func() {
+		delResp, _ := client.DeleteTrustedActionWithResponse(ctx, clusterID, instanceID)
+		if delResp != nil && delResp.StatusCode() != 200 && delResp.StatusCode() != 404 {
+			t.Logf("Warning: cleanup failed to delete instanceId=%s, status=%d", instanceID, delResp.StatusCode())
+		}
+	})
+
+	proxyResp, err := client.GetBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterID, instanceID, func(ctx context.Context, req *http.Request) error {
+		req.URL.Path += "/api/v1/namespaces"
+		return nil
+	})
 	if err != nil {
 		t.Fatalf("Failed to make proxied K8s call: %v", err)
 	}
@@ -170,14 +199,15 @@ func TestProxyTrustedAction(t *testing.T) {
 		t.Errorf("Expected 2xx proxied response, got %d", proxyResp.StatusCode)
 	}
 
-	t.Logf("Proxied K8s call succeeded: instanceId=%s status=%d", instanceID, proxyResp.StatusCode)
+	t.Logf("Proxied K8s call to /api/v1/namespaces succeeded: instanceId=%s status=%d", instanceID, proxyResp.StatusCode)
 }
 
 // TestProxyTrustedActionMutations creates a trusted action with permissions to create
 // and update ConfigMaps, then tests POST, PATCH, and PUT operations through the proxy.
 func TestProxyTrustedActionMutations(t *testing.T) {
 	client, clusterID := newTrustedActionClient(t)
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	// Create trusted action with permissions to manage ConfigMaps
 	req := Openapi.CreateTrustedActionRequest{
@@ -203,6 +233,13 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 		t.Fatalf("Expected status 200 on create, got %d. Body: %s", createResp.StatusCode(), string(createResp.Body))
 	}
 	instanceID := createResp.JSON200.InstanceId
+
+	t.Cleanup(func() {
+		delResp, _ := client.DeleteTrustedActionWithResponse(ctx, clusterID, instanceID)
+		if delResp != nil && delResp.StatusCode() != 200 && delResp.StatusCode() != 404 {
+			t.Logf("Warning: cleanup failed to delete instanceId=%s, status=%d", instanceID, delResp.StatusCode())
+		}
+	})
 
 	// Test POST: Create a ConfigMap
 	configMapJSON := `{
