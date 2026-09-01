@@ -256,7 +256,11 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 
 	postResp, err := client.PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(
 		ctx, clusterID, instanceID, "application/json",
-		bytes.NewBufferString(configMapJSON))
+		bytes.NewBufferString(configMapJSON),
+		func(ctx context.Context, req *http.Request) error {
+			req.URL.Path += "/api/v1/namespaces/default/configmaps"
+			return nil
+		})
 	if err != nil {
 		t.Fatalf("Failed to POST ConfigMap through proxy: %v", err)
 	}
@@ -279,7 +283,11 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 
 	patchResp, err := client.PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(
 		ctx, clusterID, instanceID, "application/merge-patch+json",
-		bytes.NewBufferString(patchJSON))
+		bytes.NewBufferString(patchJSON),
+		func(ctx context.Context, req *http.Request) error {
+			req.URL.Path += "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
+			return nil
+		})
 	if err != nil {
 		t.Fatalf("Failed to PATCH ConfigMap through proxy: %v", err)
 	}
@@ -307,7 +315,11 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 
 	putResp, err := client.PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(
 		ctx, clusterID, instanceID, "application/json",
-		bytes.NewBufferString(putConfigMapJSON))
+		bytes.NewBufferString(putConfigMapJSON),
+		func(ctx context.Context, req *http.Request) error {
+			req.URL.Path += "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
+			return nil
+		})
 	if err != nil {
 		t.Fatalf("Failed to PUT ConfigMap through proxy: %v", err)
 	}
@@ -322,7 +334,11 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 
 	// Clean up: Delete the ConfigMap
 	deleteResp, err := client.DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId(
-		ctx, clusterID, instanceID)
+		ctx, clusterID, instanceID,
+		func(ctx context.Context, req *http.Request) error {
+			req.URL.Path += "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
+			return nil
+		})
 	if err != nil {
 		t.Fatalf("Failed to DELETE ConfigMap through proxy: %v", err)
 	}
