@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -187,7 +188,7 @@ func TestProxyTrustedAction(t *testing.T) {
 	})
 
 	proxyResp, err := client.GetBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterID, instanceID, func(ctx context.Context, req *http.Request) error {
-		req.URL.Path += "/api/v1/namespaces"
+		req.URL.Path = strings.TrimRight(req.URL.Path, "/") + "/api/v1/namespaces"
 		return nil
 	})
 	if err != nil {
@@ -258,7 +259,7 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 		ctx, clusterID, instanceID, "application/json",
 		bytes.NewBufferString(configMapJSON),
 		func(ctx context.Context, req *http.Request) error {
-			req.URL.Path += "/api/v1/namespaces/default/configmaps"
+			req.URL.Path = strings.TrimRight(req.URL.Path, "/") + "/api/v1/namespaces/default/configmaps"
 			return nil
 		})
 	if err != nil {
@@ -268,10 +269,10 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 
 	if postResp.StatusCode < 200 || postResp.StatusCode >= 300 {
 		body, _ := io.ReadAll(postResp.Body)
-		t.Errorf("Expected 2xx response for POST, got %d. Body: %s", postResp.StatusCode, string(body))
-	} else {
-		t.Logf("POST through proxy succeeded: status=%d", postResp.StatusCode)
+		t.Fatalf("Expected 2xx response for POST, got %d. Body: %s", postResp.StatusCode, string(body))
 	}
+	io.Copy(io.Discard, postResp.Body)
+	t.Logf("POST through proxy succeeded: status=%d", postResp.StatusCode)
 
 	// Test PATCH: Update the ConfigMap
 	patchJSON := `{
@@ -285,7 +286,7 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 		ctx, clusterID, instanceID, "application/merge-patch+json",
 		bytes.NewBufferString(patchJSON),
 		func(ctx context.Context, req *http.Request) error {
-			req.URL.Path += "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
+			req.URL.Path = strings.TrimRight(req.URL.Path, "/") + "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
 			return nil
 		})
 	if err != nil {
@@ -317,7 +318,7 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 		ctx, clusterID, instanceID, "application/json",
 		bytes.NewBufferString(putConfigMapJSON),
 		func(ctx context.Context, req *http.Request) error {
-			req.URL.Path += "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
+			req.URL.Path = strings.TrimRight(req.URL.Path, "/") + "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
 			return nil
 		})
 	if err != nil {
@@ -336,7 +337,7 @@ func TestProxyTrustedActionMutations(t *testing.T) {
 	deleteResp, err := client.DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId(
 		ctx, clusterID, instanceID,
 		func(ctx context.Context, req *http.Request) error {
-			req.URL.Path += "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
+			req.URL.Path = strings.TrimRight(req.URL.Path, "/") + "/api/v1/namespaces/default/configmaps/test-proxy-mutation"
 			return nil
 		})
 	if err != nil {
