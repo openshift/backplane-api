@@ -69,6 +69,13 @@ const (
 	CreateRemediationParamsManagingClusterService    CreateRemediationParamsManagingCluster = "service"
 )
 
+// Defines values for CreateTrustedActionParamsManagingCluster.
+const (
+	Hive       CreateTrustedActionParamsManagingCluster = "hive"
+	Management CreateTrustedActionParamsManagingCluster = "management"
+	Service    CreateTrustedActionParamsManagingCluster = "service"
+)
+
 // AssumableRole Roles and there corresponding ARN
 type AssumableRole struct {
 	// Arn ARN for the assumable role
@@ -147,6 +154,39 @@ type CreateTestJob struct {
 
 	// ScriptMetadata Script metadata
 	ScriptMetadata ScriptMetadata `json:"scriptMetadata"`
+}
+
+// CreateTrustedActionRequest Request body to create a trusted action instance
+type CreateTrustedActionRequest struct {
+	// CustomerDataAccess If true, triggers Access Transparency checks before proceeding
+	CustomerDataAccess bool `json:"customerDataAccess"`
+
+	// HiveClusterRbac Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+	HiveClusterRbac *map[string]interface{} `json:"hiveClusterRbac"`
+
+	// ManagementClusterRbac Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+	ManagementClusterRbac *map[string]interface{} `json:"managementClusterRbac"`
+
+	// Name Base name for the trusted action; becomes the prefix of the returned instanceId
+	Name string `json:"name"`
+
+	// Rbac RBAC rules to grant on the target cluster for a trusted action
+	Rbac TrustedActionRbacDecl `json:"rbac"`
+
+	// ServiceClusterRbac Reserved for forward-compatibility; not yet implemented and must be null/absent (a non-null value returns 400)
+	ServiceClusterRbac *map[string]interface{} `json:"serviceClusterRbac"`
+}
+
+// CreateTrustedActionResult Response returned when a trusted action instance is created
+type CreateTrustedActionResult struct {
+	// Expiry RFC3339 UTC timestamp when the scoped service account expires (720 minutes from creation)
+	Expiry time.Time `json:"expiry"`
+
+	// InstanceId Opaque identifier for the trusted action instance, format: {name}--{uuid4}
+	InstanceId string `json:"instanceId"`
+
+	// ProxyUri Path to use for proxying kube-api calls via this trusted action
+	ProxyUri string `json:"proxyUri"`
 }
 
 // EnvDecl defines model for EnvDecl.
@@ -421,6 +461,15 @@ type TestJobResult struct {
 // TestJobResultStatus Test run status
 type TestJobResultStatus string
 
+// TrustedActionRbacDecl RBAC rules to grant on the target cluster for a trusted action
+type TrustedActionRbacDecl struct {
+	// ClusterRoleRules Cluster-scoped RBAC rules
+	ClusterRoleRules []PolicyRule `json:"clusterRoleRules"`
+
+	// Roles Namespace-scoped role declarations
+	Roles []RoleRbacDecl `json:"roles"`
+}
+
 // GetReportsByClusterParams defines parameters for GetReportsByCluster.
 type GetReportsByClusterParams struct {
 	Last *int `form:"last,omitempty" json:"last,omitempty"`
@@ -473,6 +522,51 @@ type GetTestScriptRunLogsParams struct {
 	Follow *bool `form:"follow,omitempty" json:"follow,omitempty"`
 }
 
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody defines parameters for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody = map[string]interface{}
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody defines parameters for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody = []map[string]interface{}
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody defines parameters for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody = map[string]interface{}
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody defines parameters for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody = map[string]interface{}
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody defines parameters for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody = map[string]interface{}
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody defines parameters for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody = []map[string]interface{}
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody defines parameters for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody = map[string]interface{}
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody defines parameters for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody = map[string]interface{}
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody defines parameters for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody = map[string]interface{}
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody defines parameters for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody = []map[string]interface{}
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody defines parameters for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody = map[string]interface{}
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody defines parameters for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody = map[string]interface{}
+
+// CreateTrustedActionParams defines parameters for CreateTrustedAction.
+type CreateTrustedActionParams struct {
+	// ManagingCluster If specified, which managing cluster to create kube-api access for ( service | management | hive )
+	ManagingCluster *CreateTrustedActionParamsManagingCluster `form:"managingCluster,omitempty" json:"managingCluster,omitempty"`
+}
+
+// CreateTrustedActionParamsManagingCluster defines parameters for CreateTrustedAction.
+type CreateTrustedActionParamsManagingCluster string
+
 // CreateReportJSONRequestBody defines body for CreateReport for application/json ContentType.
 type CreateReportJSONRequestBody = CreateReport
 
@@ -481,6 +575,45 @@ type CreateJobJSONRequestBody = CreateJob
 
 // CreateTestScriptRunJSONRequestBody defines body for CreateTestScriptRun for application/json ContentType.
 type CreateTestScriptRunJSONRequestBody = CreateTestJob
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody defines body for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/json ContentType.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody = PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody defines body for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/json-patch+json ContentType.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody = PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody defines body for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/merge-patch+json ContentType.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody = PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody defines body for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/strategic-merge-patch+json ContentType.
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody = PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody defines body for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/json ContentType.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody = PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody defines body for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/json-patch+json ContentType.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody = PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody defines body for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/merge-patch+json ContentType.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody = PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody defines body for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/strategic-merge-patch+json ContentType.
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody = PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody defines body for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/json ContentType.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody = PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONBody
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody defines body for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/json-patch+json ContentType.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody = PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONBody
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody defines body for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/merge-patch+json ContentType.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody = PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONBody
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody defines body for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId for application/strategic-merge-patch+json ContentType.
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody = PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONBody
+
+// CreateTrustedActionJSONRequestBody defines body for CreateTrustedAction for application/json ContentType.
+type CreateTrustedActionJSONRequestBody = CreateTrustedActionRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -668,6 +801,62 @@ type ClientInterface interface {
 
 	// GetTestScriptRunLogs request
 	GetTestScriptRunLogs(ctx context.Context, clusterId string, testId string, params *GetTestScriptRunLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId request
+	DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetBackplaneTrustedactionClusterIdTrustedActionInstanceId request
+	GetBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// HeadBackplaneTrustedactionClusterIdTrustedActionInstanceId request
+	HeadBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceId request
+	OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody request with any body
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody request with any body
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody request with any body
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TraceBackplaneTrustedactionClusterIdTrustedActionInstanceId request
+	TraceBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateTrustedActionWithBody request with any body
+	CreateTrustedActionWithBody(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateTrustedAction(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteTrustedAction request
+	DeleteTrustedAction(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetCloudConsole(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1128,6 +1317,282 @@ func (c *Client) GetTestScriptRun(ctx context.Context, clusterId string, testId 
 
 func (c *Client) GetTestScriptRunLogs(ctx context.Context, clusterId string, testId string, params *GetTestScriptRunLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetTestScriptRunLogsRequest(c.Server, clusterId, testId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) HeadBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewHeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(c.Server, clusterId, trustedActionInstanceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(c.Server, clusterId, trustedActionInstanceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(c.Server, clusterId, trustedActionInstanceId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody(c.Server, clusterId, trustedActionInstanceId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TraceBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(c.Server, clusterId, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateTrustedActionWithBody(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTrustedActionRequestWithBody(c.Server, clusterId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateTrustedAction(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTrustedActionRequest(c.Server, clusterId, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteTrustedAction(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteTrustedActionRequest(c.Server, clusterId, trustedActionInstanceId)
 	if err != nil {
 		return nil, err
 	}
@@ -2680,6 +3145,582 @@ func NewGetTestScriptRunLogsRequest(server string, clusterId string, testId stri
 	return req, nil
 }
 
+// NewDeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest generates requests for DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId
+func NewDeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest generates requests for GetBackplaneTrustedactionClusterIdTrustedActionInstanceId
+func NewGetBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewHeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest generates requests for HeadBackplaneTrustedactionClusterIdTrustedActionInstanceId
+func NewHeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("HEAD", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewOptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest generates requests for OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceId
+func NewOptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("OPTIONS", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest calls the generic PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/json body
+func NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/json", bodyReader)
+}
+
+// NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody calls the generic PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/json-patch+json body
+func NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/json-patch+json", bodyReader)
+}
+
+// NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody calls the generic PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/merge-patch+json body
+func NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/merge-patch+json", bodyReader)
+}
+
+// NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody calls the generic PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/strategic-merge-patch+json body
+func NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/strategic-merge-patch+json", bodyReader)
+}
+
+// NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody generates requests for PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId with any type of body
+func NewPatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server string, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest calls the generic PostBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/json body
+func NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/json", bodyReader)
+}
+
+// NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody calls the generic PostBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/json-patch+json body
+func NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/json-patch+json", bodyReader)
+}
+
+// NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody calls the generic PostBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/merge-patch+json body
+func NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/merge-patch+json", bodyReader)
+}
+
+// NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody calls the generic PostBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/strategic-merge-patch+json body
+func NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/strategic-merge-patch+json", bodyReader)
+}
+
+// NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody generates requests for PostBackplaneTrustedactionClusterIdTrustedActionInstanceId with any type of body
+func NewPostBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server string, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest calls the generic PutBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/json body
+func NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/json", bodyReader)
+}
+
+// NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody calls the generic PutBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/json-patch+json body
+func NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationJSONPatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/json-patch+json", bodyReader)
+}
+
+// NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody calls the generic PutBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/merge-patch+json body
+func NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationMergePatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/merge-patch+json", bodyReader)
+}
+
+// NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody calls the generic PutBackplaneTrustedactionClusterIdTrustedActionInstanceId builder with application/strategic-merge-patch+json body
+func NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithApplicationStrategicMergePatchPlusJSONBody(server string, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server, clusterId, trustedActionInstanceId, "application/strategic-merge-patch+json", bodyReader)
+}
+
+// NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody generates requests for PutBackplaneTrustedactionClusterIdTrustedActionInstanceId with any type of body
+func NewPutBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequestWithBody(server string, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest generates requests for TraceBackplaneTrustedactionClusterIdTrustedActionInstanceId
+func NewTraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdRequest(server string, clusterId string, trustedActionInstanceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedaction/%s/%s/", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("TRACE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateTrustedActionRequest calls the generic CreateTrustedAction builder with application/json body
+func NewCreateTrustedActionRequest(server string, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateTrustedActionRequestWithBody(server, clusterId, params, "application/json", bodyReader)
+}
+
+// NewCreateTrustedActionRequestWithBody generates requests for CreateTrustedAction with any type of body
+func NewCreateTrustedActionRequestWithBody(server string, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedactions/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.ManagingCluster != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "managingCluster", runtime.ParamLocationQuery, *params.ManagingCluster); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteTrustedActionRequest generates requests for DeleteTrustedAction
+func NewDeleteTrustedActionRequest(server string, clusterId string, trustedActionInstanceId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "trustedActionInstanceId", runtime.ParamLocationPath, trustedActionInstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/backplane/trustedactions/%s/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -2836,6 +3877,62 @@ type ClientWithResponsesInterface interface {
 
 	// GetTestScriptRunLogsWithResponse request
 	GetTestScriptRunLogsWithResponse(ctx context.Context, clusterId string, testId string, params *GetTestScriptRunLogsParams, reqEditors ...RequestEditorFn) (*GetTestScriptRunLogsResponse, error)
+
+	// DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request
+	DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request
+	GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request
+	HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request
+	OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse request with any body
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse request with any body
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse request with any body
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request
+	TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error)
+
+	// CreateTrustedActionWithBodyWithResponse request with any body
+	CreateTrustedActionWithBodyWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error)
+
+	CreateTrustedActionWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error)
+
+	// DeleteTrustedActionWithResponse request
+	DeleteTrustedActionWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*DeleteTrustedActionResponse, error)
 }
 
 type GetCloudConsoleResponse struct {
@@ -3612,6 +4709,218 @@ func (r GetTestScriptRunLogsResponse) StatusCode() int {
 	return 0
 }
 
+type DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateTrustedActionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateTrustedActionResult
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateTrustedActionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateTrustedActionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteTrustedActionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *string
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteTrustedActionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteTrustedActionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetCloudConsoleWithResponse request returning *GetCloudConsoleResponse
 func (c *ClientWithResponses) GetCloudConsoleWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*GetCloudConsoleResponse, error) {
 	rsp, err := c.GetCloudConsole(ctx, clusterId, reqEditors...)
@@ -3958,6 +5267,200 @@ func (c *ClientWithResponses) GetTestScriptRunLogsWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseGetTestScriptRunLogsResponse(rsp)
+}
+
+// DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request returning *DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request returning *GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.GetBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request returning *HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.HeadBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseHeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request returning *OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse request with arbitrary body returning *PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx, clusterId, trustedActionInstanceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PatchBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse request with arbitrary body returning *PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx, clusterId, trustedActionInstanceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PostBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse request with arbitrary body returning *PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithBody(ctx, clusterId, trustedActionInstanceId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PutBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationJSONPatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationJSONPatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationMergePatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBodyWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, body PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdApplicationStrategicMergePatchPlusJSONRequestBody, reqEditors ...RequestEditorFn) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithApplicationStrategicMergePatchPlusJSONBody(ctx, clusterId, trustedActionInstanceId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse request returning *TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse
+func (c *ClientWithResponses) TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	rsp, err := c.TraceBackplaneTrustedactionClusterIdTrustedActionInstanceId(ctx, clusterId, trustedActionInstanceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp)
+}
+
+// CreateTrustedActionWithBodyWithResponse request with arbitrary body returning *CreateTrustedActionResponse
+func (c *ClientWithResponses) CreateTrustedActionWithBodyWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error) {
+	rsp, err := c.CreateTrustedActionWithBody(ctx, clusterId, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTrustedActionResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateTrustedActionWithResponse(ctx context.Context, clusterId string, params *CreateTrustedActionParams, body CreateTrustedActionJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTrustedActionResponse, error) {
+	rsp, err := c.CreateTrustedAction(ctx, clusterId, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTrustedActionResponse(rsp)
+}
+
+// DeleteTrustedActionWithResponse request returning *DeleteTrustedActionResponse
+func (c *ClientWithResponses) DeleteTrustedActionWithResponse(ctx context.Context, clusterId string, trustedActionInstanceId string, reqEditors ...RequestEditorFn) (*DeleteTrustedActionResponse, error) {
+	rsp, err := c.DeleteTrustedAction(ctx, clusterId, trustedActionInstanceId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteTrustedActionResponse(rsp)
 }
 
 // ParseGetCloudConsoleResponse parses an HTTP response from a GetCloudConsoleWithResponse call
@@ -4722,88 +6225,283 @@ func ParseGetTestScriptRunLogsResponse(rsp *http.Response) (*GetTestScriptRunLog
 	return response, nil
 }
 
+// ParseDeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParseDeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseGetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParseGetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseHeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParseHeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &HeadBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseOptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParseOptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &OptionsBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParsePatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParsePatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParsePostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParsePostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParsePutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParsePutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseTraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse parses an HTTP response from a TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdWithResponse call
+func ParseTraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse(rsp *http.Response) (*TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TraceBackplaneTrustedactionClusterIdTrustedActionInstanceIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseCreateTrustedActionResponse parses an HTTP response from a CreateTrustedActionWithResponse call
+func ParseCreateTrustedActionResponse(rsp *http.Response) (*CreateTrustedActionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateTrustedActionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateTrustedActionResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteTrustedActionResponse parses an HTTP response from a DeleteTrustedActionWithResponse call
+func ParseDeleteTrustedActionResponse(rsp *http.Response) (*DeleteTrustedActionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteTrustedActionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"H4sIAAAAAAAC/+x9bXMbOY7wX2H183xI9iTLeZvb83xy7M2OM3lx2c7tXk1SLnY3JDFukT0kW7Yuq/9+",
+	"RZD9zpZajpV1bH2z1SRBggAIgAD4LYjELBUcuFbBwbdARVOYUfzzUKlsRsMEzkQC5ocYVCRZqpngwUFg",
+	"flWE8pjoKUggkZASVCp4zPiEHJ59CAZBKkUKUjPAAank7WEOzz6QsZBmEEJziEQakINAL1IIDgKlJeOT",
+	"YDkIOJ15pvJbNqOcSKCx6dzutxwEEv7MmIQ4OPjDDjLA6Xwp2orwK0TawMB146LP4c8MeARnuC7lQ4L7",
+	"gkvA6du5kynlcQKyjQPTBnvng/sxaxCoiBb5oIwTIWMckGmY4Vj/X8I4OAj+36jcwpHbv1F985bFMqmU",
+	"dNHCiGdWPswcJQy4PhJ8zCbtadvfM0nN/2ROkwwUgZtUKIjNSkIaXaUJ5TCMEkbmjOKejyLsRoDHqWBc",
+	"tzD2lUl6GVIFl5lM2lA/nb0zg5uh3jJJCeNKUx7ZHYkkUG3I0ZDpjHI6wX+iCJQiBgGgtPLRGQK1M7sc",
+	"C3lpu1wWXdZg38zkELuc2R4OZ0tcXHwJfH7pJ+VznAJhMXDNxgxkwRymYxYhbj8evSfA50wKPgOuByRz",
+	"KI5Bg5wxXms9V4QLPqz8ci3k1TgR15Z95zRhsd00RxMzlAY+NvKQhMjiIwk4X5qonqwSmW6dTBIlmdIg",
+	"T449RFZ88uxaJLgSCbxj/Krd0/yaU4prOCACv9LEO1q5Kt88zAIqTVaPJWGC/dpIMb+v6tvg1KiyfqWp",
+	"ztSRiDu41RA/vBWhAdtAMOWCs4gmH7xEaH4lYoyosr8bxMmM+5aWUklnhu6sfItjZpdyWoPY6tY4BciM",
+	"pgZkOVpB+LbdgMwypUkIhJJxQjWxC3WcraMpqM8c+aQcIYYooRJiIjiONANNY6rp58pCcnwtOzF4BqmQ",
+	"2rd3yNokFPGiIW0Ih2sibb8mcZsJ+AYzjQ1hauRoI/B+eUmARyKG2Id3lc1mVC48Jypxn4gRMQUai+ms",
+	"JjCcXjl6N2FdgNKOuOrwX3vwoQ2ivoqwhQ2zzpMZncDHOUjJYvCeK5oyDpIw05BoOjHkKFwHEsOYZom2",
+	"8h3ioe2rEIWuS5yhVM1nYUh5z4fTWC7OMg+bvkksTMZjFlEN5HoKRusxv02AgzS/mVXO0sT8KSSBG4gy",
+	"DRUKLgGGQiRA+QPinkFg4Zi991BEjZhzkYJ80y1XbKv3Dui6E/e83rpJ1ZXZtUZeQeLSCNv4EE9Nx+5r",
+	"5IAWluyRHGx3Qu2pm2sm7eMuU1rMQB5T7bSGNpCTsRkOBkRLNpmY7bEtyYWkXKVUAo8WJJpCdKVICGMh",
+	"UQeIAIw67iW9KZuDO07PQhp5T2yQc4iRlsZCXlMZDw3uqWYhS5he/Eq40GQBmrBZmqDeYNZriMqRG8+S",
+	"ZERDBVyTJxQVEfOTVQ+JBJ1JrsjL/f2nwSAwX1CDP8C1trfFsrgB85NN3K/sGb6oC+k6yfxKQojEDJRT",
+	"AGHMbvJz2c4A4oKsTrynhHQIWsU7dTIPaXQMUYIsCHLOop+LSPy2nofFHG56c7/KEr1Cqy3243oKvJv5",
+	"CVNOQMQtOQA3KfMd6Gdvjl68ePFf5NPFEdFsBkrTWWrhWAkvUiNV7WYZ60ZkXBMcDRR58p/P98mM8UyD",
+	"ImMpZu5cFtxgcyzkjOrgwJz7MDSj+6ioQmOt2X1M6Z8Z+CyWDhQMiAV6QL6Z3VkOh9+yjMUvl17tUoqb",
+	"xSfJ2nBPqZ4acZs5kwJbmlP+KgthSFNGIpokyhmaTDWms1YRKiDXlj/Id8lHN3/jc2Sdlr5dm3lbX6v8",
+	"n7M38DmZU+lDyRV4aOR3WFS6+roVJkar7z9yZcZgyQE2dNo2SorTY+lf/RnQhCmI2xi45aRRArQ7Xkzd",
+	"6aaM4WvFxDrEeacspZDtyc5AKTrxwMX25L377FNaSpOs7aW6uDgltgExilDZn3ENE5D+OXb5Elrjo/sj",
+	"lQIVuxlNU8Yn1sLP7X0SVV00LfnDlMrg0k7AOzg2IKaB9XfV/SjkCexN9gbkc3CuhVx8DsyfF1RdfQ6e",
+	"drC2meqllzRqi7mCRTn4x9/OzztG1EYXQgX60uAZvkenfk9TVSIOh8OjGp1yJSBycqz6GZNeQ/yrCH0y",
+	"9ZCTjDMrVtHusMJ1YVnUWTBev5UIz5HC1nqoioZGreqi90MyhSQdZwlxTXIHSqbAK5vM7++PX7VHen/8",
+	"KudQ04ZcT3NFGf3HzjbswbJvqytsnJ/cg8q/8Xj0hnGmpnh21t0aXQdgh45RrhP4XPnQhe5VA6Pinuu2",
+	"yvo6c6uSteXKtcqlSmnU4cnBTw13TgjmpJR0heXVz+JyQs/nHzk3P2+A9A5h2h7YydDmoMCzmTm4T4E7",
+	"m+cs49z+dZ5FxhRCpesNZQn+8YlfcXFtUPA7S8xPX3pR4DsaQnKrcz6UDMa+0z4xQ97mrO/saN3v7b7/",
+	"bd3yOR02+pe3A+1VM6Wtk8pL+AlT2kzKepksAEqct7LLwXvJYv/Z7r4TczBKThPy6ZPf4yvLGRWc1ABl",
+	"hcwl1V7Fh1d8Y+SaqsKdE/cmU9vZu5ZPuRBv6cZd3rg79Outu/SpbEKJSJ9a+05MGO927OPnXLGRebNB",
+	"X51q1q1NoQp+mfm0/9+zEA5PT6zWTz6dnWyqja1RxOyyPfSUuF9bOCgEUirifkfZe9B0/uy8Q8odkqu/",
+	"KmLbOOwOyPWURVMSUW7MZjuxJFmYE8YowuGCiGhk7J9IJ3gfxFSa0AWhpMRygz26VVVr0XZhyOhLmjLf",
+	"3QhFV+H82Z5d2rFt51yOA5JxvK5ivLwRJFEmJXCdLHyuxf7qiZ89qfKLY/uF2KYGm3MW23s0vCPCy85N",
+	"zqXaqnOGcN287HkqEhYtzjJ7vd64KE7Z36XI0rpsa6u8VQ4fBDdDQVM2NHs2AT6EGy3pUFNLsgs6S0zb",
+	"fOSBmJmBU21lA0cvh8hkBJ/O3t093Mb4DejSfUKN5c5h10bvgLw9qE2Ic5Dh3UPDUWuQfELn7PXhkcfF",
+	"9PrwyDn8/bahOyzORAKGXuuzX6UmVmj8dstqQm7unthkNjhKxcN5m00VzUkse3YMadSY/BnMIGaI8dYh",
+	"S5Pk4zg4+GP1gurdloOmGJElhJMVTjwj8Fhc+paLTqXjclhEGSQC78BMy/ND8jnb33/+C0EKyi26cFGR",
+	"7e76SFM5AV1RCVe73/wTb6snXxCN/hvaQ6IYnySFfrdGKd26pnhXV7/3VeNs6JclPgf5tXI589VXzDU+",
+	"bZ2NNYO3jZ27kk9e+XleGMeN8zpJxDXE5ZndJCCjuE3wK6ESiGvvLkCtY6ftFVh9LiwHAc301LowG1uH",
+	"v9dt5AGZMD3NQvTAuIuRdtTL6tCQN5nRN//MaGKoK7aE0YDCLKtYnkCjUCRwEo/sd9Nj7zN/7+5+rJ9r",
+	"QN6fEcaHaUIjsNeYBjPAx0JGgNj57PVV9Lk7zf3bQuJNVMUNMqUq92JqQfKxiCPW9pXpbe17Bw59sVOq",
+	"CdMkFuCNPOvwLHG/a2lOJaNhAt/hWfIehctBgK6BNVOxbbphe4flk8yrzV+UiCoalV6ddKGnqJeEVE09",
+	"nppBkFI97bgmwmuvXHQRKYTOtfxmaEZlOJAzmnhDyU7zT/VRyJgleNxNmL7tXSyqZ0YmT4XUx6vJDdsY",
+	"cq0QHG6FpQhDbQlTfSP5zlvxFg13nl1jHgXSjmxtCsDbCLGe/L2WMzvZ6nu5wmyxF0DJLr1AlE7ENTzS",
+	"n/7zGIM7p7vVxzxiZJBftFf3wTNasdduVm5jKkseNAipwKyXFr4UhNsf9aXjuol3F9LWddePgW3o46wG",
+	"fdeiyla5vXr7Ecw0UClwDUohuMahnXu+fdRhZum9aqrcNKHwMMCdPPNeMjW2343rU+L8cSV+2xOVNgyn",
+	"k5Rrv82Q47t5j7/eUvXGEA9d4EQJv++puUpnrFikHVcxOVzME6jY3L3BrzRiO7y8JTryCX7x3VoqiDLJ",
+	"9OLcgLKreA1UgjT6JMZr4n9vcnPn67UOmjenb/9xQbS4Ak4Mr2O8nRnMyGvsXJLUVOvU2s+Mj4WHNk9P",
+	"yBshS1vSdGXaSODgdZFNcHh6EqBPRdlez/b29/ZtxANwmrLgIHixt7/3IrAqAi5qVAw5wlD0kYsIH33L",
+	"A6zjpWk3AZQDhr6sKRoHB8HfQduwd9snqEdx/rHJhQYzDVBxyeV3EeFtvfL5Rtp7SEsBPpn8Bf1YKJZw",
+	"gc/39617F41K61BMExbhKkZfnUe0HG8VvXXG+OPWNaKBrgzmX7ag/2X0l/4AbViGZ/TXNCZ5HCaCebEV",
+	"MG+EDFkcA7dAXm4FiJNCaJKMRcZjC+yXrQD7IDQaOinqhgbSqy1t0UlO4ecg5yBJ3rDiZjAM5DJAHNuR",
+	"TCYN74zp0ebSkghHNjFqaITZULmspb7s207xevBMvCKrbcfGOzbuycYG4HY26zebC0ZipszaYo/I8HH8",
+	"plJjo/O9kgC2O+N3wmEnHO6xcIiaCZnrJAP+XJUHI2uAJKChLROO8ffC6HAbe1Tj4wprPvvnP9vmjPlx",
+	"OQie+749t99e+L69sN9e+r69tN9e+b6ZH+uIOsVoGRcgMhIRoSkr4ncHRLhQ/kpkxtAYUMtBp6B8vBiZ",
+	"Ao3bKPkNaPx4cWIzBlQbLR/th8eLmXuhPaRUR9P25pyanx/x1gjlkW2nQj1i4ZZmPpRkjxgjWrp4gzpO",
+	"LszPjxUrq1WqSxYvR5UA7S4VwkWVv14clYE5dWmJMvDPDOSiFIIJVTqoyruGMpzNQpDViHQtXETrgCgh",
+	"XZRSmU5putvrE/IkryjwbP+pLzZ4m3ZYNczeowjjtY9S4ywxi5EM5jSpLHKbdlmh5G/LIqsAeLldAK+2",
+	"i6KWbbI6OWLpp3fvmZ8H63cd+rdOpUD1wHsQ1oqgWNigikIPd+N8qIJY1m+wzAqXLYZ7dmewq1C9cXmq",
+	"YLlkUaRuPwg++5FscJQXxSgr42xmoFdPk9G3Io5wuf5keb1oH8R3KbK7KWi1tN4J63sprClRKURszKKc",
+	"TsMFOTm+J2J64OvsIjjcdLvMxmrs7QZmY4Mti+TzTte5bbFVX3WlDKHX62q+N5Ld78WVZ3teNjRxpV6d",
+	"iAnjzYuL++FP8CoMmJJQ6vLbU5XrqQ/tfXGJiYUQHhSlZGzWYCZZHqvsct3K2KXd6b6J3LSY1qL7OM/T",
+	"OWpX9OYcL7I8NvK/54kzUJjalVSanTP+caOnh2f+cSOot5v+caPp33/GtrS9amaeGXlQlvy1ReJcFbC8",
+	"CJinPlaXcljf17u+VXjklLT+iuGRI2jdfcPjRk+vy4fHjCK/smlsiobdtFq/rCNspfzvkTGdSpgzkalk",
+	"4X7TrJUdnUvjxu2GP/v5u46Ok3Hu2IA4LyRSlMTPT7KyfG1RRdHlR5oj5ElRZPJfpCzFSv5FpmwO5GnH",
+	"WnIgpUlYzjpPbDEDBNX6rkFRfdRXlanjBqa+YNxSsyGlBbiz7Da17CxfKEI5gRumsJy3j9h/JbFrWdFC",
+	"ilqkT84Pn2I+Yq1KQJlP3h7v/sRMrLwU6S0uzHTzXGlaW7HjRJcOXRUU62XDB5t0t5MKW4+P7azU4b04",
+	"sl4mSrp6kWump7YYomS5kq6F80uJiERiNqM8Vr86BnHdaKIEFoqgjFtOs/UhXXfLgit5aif9NpF+JyU3",
+	"quLuynPSuxoolkn6iEB/fmPminhprBFQ7FpdubFz7hvI7pJjNwyuKCs1BBtJk58+DD7PJV55mbeLfu8H",
+	"xFUM+CA0eZMHv2+Lez9xfDcM3+PQhM4pwwKuLpNZrQjKKAsV5Q+HFEVqa+VB1vPhiCbJyqyzJFnPjjuG",
+	"+vkZ6v4ROU0SD6FLmFAZJ4a+xdiSfApyxpRC9/B6gv9qa1qvIPi3IlTfewnYKyn+rQg9ufAtFL4VYV5W",
+	"YUd0GxKdswHyct2e0IkkyQthqPxmtajV1SlWfwJD7y1WJ99e6BsSb5+4t7sTzAXILqGcLAgW9oaYULvf",
+	"O365Q34pAuK+inAPdSQtSIhPE47RDkAT8eqvrty/qyTaTyaPvuG7Aj0cnpaw1/KfCzAyMzk5bhVe93Ch",
+	"fdfguzwT/07VZ5fvejsg5nSt5bpun8kqPg8npF7tP/+hMAcFmYLHhXCuRWq5HEs6PUFSllmqnw7QHSBh",
+	"JuZYDrJgcqOYJfZlDFG8+LEq7uMs4xtwsX2Z0L5d8gh4eZun5VnG81pZD1Op3LJroCTFHyw10N9VXED4",
+	"tVnDsuUE8/3d5Pwd5Y8FdDHuWxHiKwP3+Ah2dbXK9Kk9cuzSo5gib88/fhiQ+XPzt9IS6KwSYdJwKuYV",
+	"ujaawjleTiwIc++diIkiaiqyJDbK0ljYWoF7HSDtdx/EyktmD05YIUkZQq0OISINemj3aOOhWpx0KmK7",
+	"F44QH6B98IB0pDHoaFrwj89N5LaSVis/NkSdBqX9dw+rLOcLUO4OoqeS8mM4b1uGfP4o9g825uuFS30p",
+	"Ee7JT+TXeoXPVnjEs21RI1Z+Zf+bp8/9xDx8eHqCPFy4YH/8xaTjjo8f3v0PMdNxTmHtaseqARE8WVSc",
+	"xIzjw7qpFHFmH2StFBJX/bh99M2We1155bgxyzvVxg5dPqtgb0KBGPGSx4BV3CocrovV+uWDK037uC2X",
+	"taKhqDYssYnaCYGfWgjkTscfIwfWWjg1YbChrXNvBcLOJtrZRCsEqVWyd1L0oahSuKHfK0dt0Xpbs74h",
+	"Sqtl8sto743yIS+qwxfx/xf+kXf5kTt0bZgvuUPYrfInd2i75/mUBmoRxWv96rSat1M8Ud98c8SnXa7Y",
+	"1rtOp9ycsPp4vMzfiyFO4D/so5XfOouW2FoXQ8ViINiPYD+8U/k9C0FyzAYpH1f1PTeyWp9rKAoyZFpS",
+	"uUAFu9D/QxHjRc41le7x3gp0+zTIerhuzeumgIBxI0ixOWrViptPYJX1JVpvtlSnNAM5gZ5zem/afi/u",
+	"lTYG1oRFw01An+e9yOx2k1gud4m/O1besfKOlR9CivqOkXeMvGPkB1JMYWe5dRVXqHmy1E9Ul87d0Fe3",
+	"cN1lxL3OjvamRQ9s0nRXdvTW4h5qT33mkTo/NgjCO5OuW888Rxvvk4pqgJVyScVelgyiq86CMvHatI5d",
+	"rQkb02sawk3K5KIM1MMnPxtJwQ+lAuwvD61OsWo9M9vK9e7e1f6p3kXGf4vY+gvd7vuD9dcHTVn4XazZ",
+	"lDft+7E6QstodzvJH1VU++WOG76r+ksHX/zqMhlUf85o1oFpOFl3HuN+9ZkrzzYjlqoPNv/xxZz7Cu1C",
+	"i8NMJu7lZXUwGtU0vb1UsjnVsGdUiD2Hrz2RAldTNtZ7kZgFZribYUgVDDHbRW2X2G+GbhpDFg+RGjYr",
+	"n313dBDcDK/+qoYor02Dh20jVRY7vGZ6OgydzrhzWuycFvfQaVFl5TFNFDx4L8bN0I48TCifGHMwXegp",
+	"HjQhVdPgy/L/AgAA//9WCvKL2rEAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
