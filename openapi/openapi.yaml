@@ -109,7 +109,15 @@ paths:
           required: false
           schema:
             type: integer
-            description: Number of reports to return, sorted by timestamp descending (default 10)
+            description: Number of most recent reports to return (default 10)
+        - in: query
+          name: order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+            description: Response order by creation timestamp
       responses:
         200:
           description: Successful retrieval of reports
