@@ -1,6 +1,6 @@
 module github.com/openshift/backplane-api
 
-go 1.24.0
+go 1.26
 
 require (
 	github.com/getkin/kin-openapi v0.132.0
@@ -22,7 +22,6 @@ require (
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/speakeasy-api/jsonpath v0.6.0 // indirect
 	github.com/speakeasy-api/openapi-overlay v0.10.2 // indirect
-	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
