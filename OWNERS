@@ -13,6 +13,8 @@ reviewers:
   - eth1030
   - AlexSmithGH
   - BATMAN-JD
+  - bergmannf
+  - RaphaelBut
 
 approvers:
   - wanghaoran1988
@@ -30,6 +32,8 @@ approvers:
   - eth1030
   - AlexSmithGH
   - BATMAN-JD
+  - bergmannf
+  - RaphaelBut
 
 maintainers:
   - wanghaoran1988
@@ -39,3 +43,6 @@ maintainers:
   - eth1030
   - AlexSmithGH
   - BATMAN-JD
+  - bergmannf
+  - RaphaelBut
+  - xiaoyu74
